@@ -46,23 +46,36 @@ appartient (C x y) (Rectangle (C x' y') w h) =(x >= x') && (x <= x+w) && (y >= y
 -- True
 
 
-
-
-
-
 adjacent ::Coord -> Forme -> Bool
 adjacent (C cx cy) (HSegement (C x y) l) =
-    (cy==y) && ((cx==x) || (cx==x+l))
+    (cy == y) && ((cx >= x) || (cx <= x+l)) -- point entre le point le plus a gauche et le point le plus a droite
 adjacent (C cx cy) (VSegement (C x y) l) =
-    (cx==x) && ((cy==y) || (cy==y+l))
+    (cx == x) && ((cy >= y) || (cy == y+l)) -- point entre le point le plus en haut et le point le plus en bas
 adjacent (C cx cy) (Rectangle (C x y) w h) =
-  -- to continue
+    (cx == x) && ((cy >= y) || (cy == y+h)) -- point entre le point le plus en haut et le point le plus en bas
+    || (cx == x+w) && ((cy >= y) || (cy==y+h)) -- point le plus à droit du rectangle et entre le point le plus en haut et le point le plus en bas
+    || (cy == y) && ((cx >= x) || (cx == x+w)) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Nord
+    || (cy == y+h) && ((cx >= x) || (cx == x+w)) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Sud
 
 
 
+point1 = C (-1) 1
+segment1 = HSegement (C 0 1) 5
+-- >>> adjacent point1 segment1
+-- True
+
+point2 = C 0 0
+segment2 = VSegement (C 0 1) 5
+-- >>> adjacent point2 segment2
+-- False
+
+point3 = C 2 5
+rectangle1 = Rectangle (C 0 0) 5 5
+-- >>> adjacent point3 rectangle1
+-- True
 
 
-
+-- ! la fonction proche renvoi su un point est il est proche d'une forme (a une distance de 1)
 proche :: Coord -> Forme -> Bool
 proche (C cx cy) (HSegement (C x y) l) =
 --   (y == y') && ((x == x'-1) || (x == x'+l))
@@ -107,14 +120,15 @@ proche (C cx cy) (Rectangle (C x y) w h) =
     -- si il est a Bas Droite
     || ((cx==x+w+1) && (cy==y+h+1)) -- point en Bas Droite
 
-collision_approx :: Forme -> Forme -> Bool
-collision_approx f1 f2 =
-  let (W1, E1, N1, S1) = limites f1
+-- collision_approx :: Forme -> Forme -> Bool
+-- collision_approx f1 f2 =
+--   let (W1, E1, N1, S1) = limites f1
       
-  in
-    (proche W1 f2) && (proche E1 f2) && (proche N1 f2) && (proche S1 f2)
+--   in
+--     (proche W1 f2) && (proche E1 f2) && (proche N1 f2) && (proche S1 f2)
     
 -- collision_approx forme1 forme2 -- True
+
 
 
 
