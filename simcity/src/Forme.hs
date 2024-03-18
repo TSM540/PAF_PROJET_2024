@@ -48,8 +48,23 @@ appartient (C x y) (Rectangle (C x' y') w h) =(x >= x') && (x <= x+w) && (y >= y
 
 
 
-adjacent :: Coord -> Forme -> Bool
+
+
+adjacent ::Coord -> Forme -> Bool
 adjacent (C cx cy) (HSegement (C x y) l) =
+    (cy==y) && ((cx==x) || (cx==x+l))
+adjacent (C cx cy) (VSegement (C x y) l) =
+    (cx==x) && ((cy==y) || (cy==y+l))
+adjacent (C cx cy) (Rectangle (C x y) w h) =
+  -- to continue
+
+
+
+
+
+
+proche :: Coord -> Forme -> Bool
+proche (C cx cy) (HSegement (C x y) l) =
 --   (y == y') && ((x == x'-1) || (x == x'+l))
     ((cy==y) && (cx==x-1)) -- point a gauche du segement
     || ((cy==y) && (cx==x+l+1)) -- point a droite du segement
@@ -64,7 +79,7 @@ adjacent (C cx cy) (HSegement (C x y) l) =
     -- si il est a Bas Droite
     || ((cx==x+l+1) && (cy==y+1)) -- point en Bas Droite
     
-adjacent (C cx cy) (VSegement (C x y) l) =
+proche (C cx cy) (VSegement (C x y) l) =
       ((cx==x) && (cy==y-1)) -- point au dessus du segement
     || ((cx==x) && (cy==y+l+1)) -- point en dessous du segement
     || ((cx==x-1) && (cy>=y) && (cy<=y+l)) -- point a gauche du segement
@@ -78,7 +93,7 @@ adjacent (C cx cy) (VSegement (C x y) l) =
     -- si il est a Bas Droite
     || ((cx==x+1) && (cy==y+l+1)) -- point en Bas Droite
 
-adjacent (C cx cy) (Rectangle (C x y) w h) =
+proche (C cx cy) (Rectangle (C x y) w h) =
     (cx==x-1) && (cy>=y) && (cy<=y+h) -- point a gauche du rectangle
     || (cx==x+w+1) && (cy>=y) && (cy<=y+h) -- point a droite du rectangle
     || (cy==y-1) && (cx>=x) && (cx<=x+w) -- point au dessus du rectangle
@@ -92,25 +107,15 @@ adjacent (C cx cy) (Rectangle (C x y) w h) =
     -- si il est a Bas Droite
     || ((cx==x+w+1) && (cy==y+h+1)) -- point en Bas Droite
 
--- coord1 = C 2 3
--- forme1 = HSegement (C 1 2) 5
+collision_approx :: Forme -> Forme -> Bool
+collision_approx f1 f2 =
+  let (W1, E1, N1, S1) = limites f1
+      
+  in
+    (proche W1 f2) && (proche E1 f2) && (proche N1 f2) && (proche S1 f2)
+    
+-- collision_approx forme1 forme2 -- True
 
--- -- adjacent coord1 forme1 -- True
 
--- coord2 = C 3 5
--- forme2 = VSegement (C 3 1) 3
 
--- -- adjacent coord2 forme2 -- False
-
--- coord3 = C (-1) (-1)
--- forme3 = Rectangle (C 0 0) 10 5
-
--- -- adjacent coord3 forme3 -- True
-
--- collision_approx:: Forme -> Forme -> Bool
--- collision_approx f1 f2 = 
---     let (W1, E1, N1, S1) = limites f1
---         (W2, E2, N2, S2) = limites f2
---     in
---         (E1 >= W2) && (E2 >= W1) && (S1 >= N2) && (S2 >= N1)
      
