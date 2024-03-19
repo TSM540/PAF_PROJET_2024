@@ -120,15 +120,32 @@ proche (C cx cy) (Rectangle (C x y) w h) =
     -- si il est a Bas Droite
     || ((cx==x+w+1) && (cy==y+h+1)) -- point en Bas Droite
 
--- limites :: Forme -> (Int,Int,Int,Int)
-forme = Rectangle (C 0 0) 10 5
-f = limites forme
--- (W,E,N,S) = f
+-- ! récuperer les 
+getW (a,_,_,_) = a
+getE (_,b,_,_) = b
+getN (_,_,c,_) = c
+getS (_,_,_,d) = d
 
+collision_approx :: Forme -> Forme -> Bool
+collision_approx f1 f2 = 
+    (getW (limites f1) <= getE (limites f2)) && (getE (limites f1) >= getW (limites f2)) -- si les limites de l'axe X de f1 sont en collision avec les limites de l'axe X de f2
+    && (getN (limites f1) <= getS (limites f2)) && (getS (limites f1) >= getN (limites f2)) -- si les limites de l'axe Y de f1 sont en collision avec les limites de l'axe Y de f2
 
+f1 = Rectangle (C 0 0) 10 5
+f2 = Rectangle (C 5 5) 10 5
 
+f3 = Rectangle (C 0 0) 2 2
+f4 = Rectangle (C 4 4) 2 2
 
+f5 = Rectangle (C 0 0) 2 2
+f6 = Rectangle (C 2 2) 2 2
 
+-- >>> collision_approx f1 f2
+-- True
+-- >>> collision_approx f3 f4
+-- False
+-- >>> collision_approx f5 f6
+-- True
 
 
 
