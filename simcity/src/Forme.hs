@@ -120,9 +120,12 @@ proche (C cx cy) (Rectangle (C x y) w h) =
     -- si il est a Bas Droite
     || ((cx==x+w+1) && (cy==y+h+1)) -- point en Bas Droite
 
-
+-- limites :: Forme -> (Int,Int,Int,Int)
 forme = Rectangle (C 0 0) 10 5
 f = limites forme
+-- (W,E,N,S) = f
+
+
 
 
 
