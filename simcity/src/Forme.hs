@@ -24,7 +24,7 @@ limites (HSegement (C x y) l) = (x, x+l, y, y) -- Point le plus a gauche, Point 
 limites (VSegement (C x y) l) = (x, x, y, y+l)
 limites (Rectangle (C x y) w h) = (x, x+w, y, y+h)
 
--- forme1 = HSegement (C 1 2) 5
+forme1 = HSegement (C 1 2) 5
 -- >>> limites forme1 -- (1, 6, 2, 2)
 -- forme2 = VSegement (C 3 4) 3
 -- >>> limites forme2 
@@ -120,16 +120,12 @@ proche (C cx cy) (Rectangle (C x y) w h) =
     -- si il est a Bas Droite
     || ((cx==x+w+1) && (cy==y+h+1)) -- point en Bas Droite
 
--- collision_approx :: Forme -> Forme -> Bool
--- collision_approx f1 f2 =
---   let (W1, E1, N1, S1) = limites f1
-      
---   in
---     (proche W1 f2) && (proche E1 f2) && (proche N1 f2) && (proche S1 f2)
-    
--- collision_approx forme1 forme2 -- True
+
+forme = Rectangle (C 0 0) 10 5
+f = limites forme
 
 
 
 
-     
+
+
