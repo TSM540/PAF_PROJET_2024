@@ -1,6 +1,6 @@
 module Forme where 
 
-
+-- Constructeurs
 data  Coord = C{
     cx :: Int ,
     cy :: Int
@@ -19,6 +19,8 @@ data Forme =
         | VSegement Coord Int -- Point le plus en N et la longueur du segement
         | Rectangle Coord Int Int -- Point le plus au NW et la largeur(W to E) et la hauteur (N to S)
 
+
+-- Fonctions 
 limites :: Forme -> (Int,Int,Int,Int)
 limites (HSegement (C x y) l) = (x, x+l, y, y) -- Point le plus a gauche, Point le plus a droite, Point le plus en haut, Point le plus en bas
 limites (VSegement (C x y) l) = (x, x, y, y+l)
