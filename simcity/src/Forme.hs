@@ -133,6 +133,10 @@ collision_approx f1 f2 =
     (getE (limites f1) <= getW (limites f2)) && (getE (limites f1) >= getW (limites f2)) -- si les limites de l'axe X de f1 sont en collision avec les limites de l'axe X de f2
     && (getN (limites f1) <= getS (limites f2)) && (getS (limites f1) >= getN (limites f2)) -- si les limites de l'axe Y de f1 sont en collision avec les limites de l'axe Y de f2
     -- on retourne les faux positifs si les coordonnées W E N S de f1 sont proche de f2
+  || (proche (C (getW (limites f1)) (getN (limites f1))) f2)
+  || (proche (C (getW (limites f1)) (getS (limites f1))) f2)
+  || (proche (C (getE (limites f1)) (getN (limites f1))) f2)
+  || (proche (C (getE (limites f1)) (getS (limites f1))) f2)
 
 f1 = Rectangle (C 0 0) 10 5
 f2 = Rectangle (C 5 5) 10 5
@@ -151,18 +155,15 @@ f6 = Rectangle (C 2 2) 2 2
 -- True
 collision :: Forme -> Forme -> Bool
 collision f1 f2 =
+    -- vérifier les coins
   (appartient (C (getW (limites f1)) (getN (limites f1))) f2)
+            -- W ET N de f1 sont dans f2 
   || (appartient (C (getW (limites f1)) (getS (limites f1))) f2)
   || (appartient (C (getE (limites f1)) (getN (limites f1))) f2)
   || (appartient (C (getE (limites f1)) (getS (limites f1))) f2)
-  || (adjacent (C (getW (limites f1)) (getN (limites f1))) f2)
-  || (adjacent (C (getW (limites f1)) (getS (limites f1))) f2)
-  || (adjacent (C (getE (limites f1)) (getN (limites f1))) f2)
-  || (adjacent (C (getE (limites f1)) (getS (limites f1))) f2)
-  || (proche (C (getW (limites f1)) (getN (limites f1))) f2)
-  || (proche (C (getW (limites f1)) (getS (limites f1))) f2)
-  || (proche (C (getE (limites f1)) (getN (limites f1))) f2)
-  || (proche (C (getE (limites f1)) (getS (limites f1))) f2)
+  || adjacentes f1 f2
+  
+
 
 
 
