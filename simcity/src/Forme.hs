@@ -18,7 +18,7 @@ data Forme =
         HSegement Coord Int -- Point le plus à W et la longueur du segement
         | VSegement Coord Int -- Point le plus en N et la longueur du segement
         | Rectangle Coord Int Int -- Point le plus au NW et la largeur(W to E) et la hauteur (N to S)
-
+    deriving (Show, Eq)
 
 -- Fonctions 
 limites :: Forme -> (Int,Int,Int,Int)

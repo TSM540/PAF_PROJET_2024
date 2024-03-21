@@ -23,6 +23,7 @@ zoneForme (ZoneIndustrielle f _) = f
 zoneForme (ZoneCommerciale f _) = f
 zoneForme (Admin f _) = f
 
+
 -- >>> zoneForme (Eau (Rectangle (C 0 0) 10 5))
 -- Rectangle (C {cx = 0, cy = 0}) 10 5
 
