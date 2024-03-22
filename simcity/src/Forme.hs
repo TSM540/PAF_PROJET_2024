@@ -54,10 +54,11 @@ adjacent (C cx cy) (HSegement (C x y) l) =
 adjacent (C cx cy) (VSegement (C x y) l) =
     (cx == x) && ((cy >= y) || (cy == y+l)) -- point entre le point le plus en haut et le point le plus en bas
 adjacent (C cx cy) (Rectangle (C x y) w h) =
-    (cx == x) && ((cy >= y) || (cy == y+h)) -- point entre le point le plus en haut et le point le plus en bas
-    || (cx == x+w) && ((cy >= y) || (cy==y+h)) -- point le plus à droit du rectangle et entre le point le plus en haut et le point le plus en bas
-    || (cy == y) && ((cx >= x) || (cx == x+w)) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Nord
-    || (cy == y+h) && ((cx >= x) || (cx == x+w)) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Sud
+    (cx == x) && ((cy > y) && (cy < y+h)) -- point entre le point le plus en haut et le point le plus en bas, mais pas sur les coins
+    || (cx == x+w) && ((cy > y) && (cy < y+h)) -- point le plus à droit du rectangle et entre le point le plus en haut et le point le plus en bas, mais pas sur les coins
+    || (cy == y) && ((cx > x) && (cx < x+w)) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Nord, mais pas sur les coins
+    || (cy == y+h) && ((cx > x) && (cx < x+w)) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Sud, mais pas sur les coins
+
 
 
 
@@ -155,14 +156,13 @@ f6 = Rectangle (C 2 2) 2 2
 -- True
 collision :: Forme -> Forme -> Bool
 collision f1 f2 =
-    -- vérifier les coins
-  (appartient (C (getW (limites f1)) (getN (limites f1))) f2)
-            -- W ET N de f1 sont dans f2 
-  || (appartient (C (getW (limites f1)) (getS (limites f1))) f2)
-  || (appartient (C (getE (limites f1)) (getN (limites f1))) f2)
-  || (appartient (C (getE (limites f1)) (getS (limites f1))) f2)
-  || adjacentes f1 f2
-  
+    -- Vérifier si les formes se chevauchent
+    ((appartient (C (getW (limites f1)) (getN (limites f1))) f2)
+    || (appartient (C (getW (limites f1)) (getS (limites f1))) f2)
+    || (appartient (C (getE (limites f1)) (getN (limites f1))) f2)
+    || (appartient (C (getE (limites f1)) (getS (limites f1))) f2))
+    -- Vérifier si les formes sont adjacentes
+    && adjacentes f1 f2
 
 
 
