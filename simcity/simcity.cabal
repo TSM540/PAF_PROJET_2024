@@ -25,7 +25,13 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Batiment
+      Citoyen
+      Forme
+      Occupation
+      Types
+      Ville
+      Zone
   other-modules:
       Paths_simcity
   autogen-modules:

@@ -1,7 +1,7 @@
 module Zone where
 
 import Forme
-import Data.Map as Map
+-- import Data.Map as Map
 import Batiment
 
 data Zone =
@@ -22,7 +22,7 @@ instance Show Zone where
     show (Admin forme batiment) = "Zone administrative " ++ show forme ++ " avec le bâtiment " ++ show batiment
 
  
--- Fonction
+-- Fonction zoneForme
 zoneForme :: Zone -> Forme
 zoneForme (Eau f) = f
 zoneForme (Route f) = f
@@ -30,6 +30,17 @@ zoneForme (ZoneResidentielle f _) = f
 zoneForme (ZoneIndustrielle f _) = f
 zoneForme (ZoneCommerciale f _) = f
 zoneForme (Admin f _) = f
+
+-- Fonction pour valider si une zone est valide
+estZoneValide :: Zone -> Bool
+estZoneValide (Eau _) = True
+estZoneValide (Route _) = True
+estZoneValide (ZoneResidentielle _ _) = True
+estZoneValide (ZoneIndustrielle _ _) = True
+estZoneValide (ZoneCommerciale _ _) = True
+estZoneValide (Admin _ _) = True
+
+
 
 
 
@@ -39,5 +50,6 @@ zoneForme (Admin f _) = f
 zonesDisjointes :: Zone -> Zone -> Bool
 zonesDisjointes z1 z2 =
     not (collision  (zoneForme z1) (zoneForme z2))
+
 
 

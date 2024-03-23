@@ -142,19 +142,56 @@ routesConnexes ville =
     in
         estRouteConnexe listZonesRoute ville
 
--- Création de zones pour la ville
-zoneA = Eau (Rectangle (C 0 0) 1 1)
-zoneB = Route (Rectangle (C 2 0) 1 1)
-zoneC = Route (Rectangle (C 4 0) 1 1)
-zoneD = Route (Rectangle (C 6 0) 1 1)
-zoneE = Eau (Rectangle (C 0 2) 1 1)
-zoneF = Route (Rectangle (C 2 2) 1 1)
-zoneG = Eau (Rectangle (C 4 2) 1 1)
-zoneH = Route (Rectangle (C 6 2) 1 1)
+-- -- Création de zones pour la ville
+-- zoneA = Eau (Rectangle (C 0 0) 1 1)
+-- zoneB = Route (Rectangle (C 2 0) 1 1)
+-- zoneC = Route (Rectangle (C 4 0) 1 1)
+-- zoneD = Route (Rectangle (C 6 0) 1 1)
+-- zoneE = Eau (Rectangle (C 0 2) 1 1)
+-- zoneF = Route (Rectangle (C 2 2) 1 1)
+-- zoneG = Eau (Rectangle (C 4 2) 1 1)
+-- zoneH = Route (Rectangle (C 6 2) 1 1)
 
--- Création de la ville
-v = Ville {
-    villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD),
-                               (ZonId 5, zoneE), (ZonId 6, zoneF), (ZonId 7, zoneG), (ZonId 8, zoneH)],
-    villeCitoyens = Map.empty
-}
+-- -- Création de la ville
+-- v = Ville {
+--     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD),
+--                                (ZonId 5, zoneE), (ZonId 6, zoneF), (ZonId 7, zoneG), (ZonId 8, zoneH)],
+--     villeCitoyens = Map.empty
+-- }
+
+
+-- construire une zone dans une ville 
+-- Fonction pour ajouter une zone à une ville
+construit :: Ville -> Zone -> Ville
+construit ville zone = Ville { villeZones = Map.insertWith (\new old -> old) (prochainZonId ville) zone (villeZones ville), villeCitoyens = villeCitoyens ville }
+
+
+-- Fonction pour générer le prochain identifiant de zone
+prochainZonId :: Ville -> ZonId
+prochainZonId ville =
+    let maxId = if Map.null (villeZones ville) then ZonId 0 else maximum (Map.keys (villeZones ville))
+    in ZonId (unZonId maxId + 1)
+
+unZonId :: ZonId -> Int
+unZonId (ZonId i) = i
+
+-- Précondition pour la fonction construit
+-- cette précondition vérifie que la zone à ajouter est valide
+-- on a pas a reverfier que la zone écrase une autre zone car on utilise l'invariant qui vérifie qu'il n'y a pas de collision entre les zones
+preconditionConstruit :: Ville -> Zone -> Bool
+preconditionConstruit ville zone =
+    estZoneValide zone && invariantVille (construit ville zone)
+
+-- post condition 
+-- cette post condition vérifier que la taille de la ville après l'ajout d'une zone est égale à la taille de la ville avant l'ajout d'une zone plus 1
+postconditionConstruit :: Ville -> Zone -> Ville -> Bool
+postconditionConstruit ville zone villeApres =
+    invariantVille villeApres && Map.size (villeZones villeApres) == Map.size (villeZones ville) + 1
+
+
+
+
+
+
+
+   
