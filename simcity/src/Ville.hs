@@ -59,14 +59,13 @@ invariantVille :: Ville -> Bool
 invariantVille  v=  
             invariantZonesDisjointes v &&
             villeVerifiantAdjacenceARoute v
+            && routesConnexes v
 
 --  toutes les zones soit disjointes deux `a deux
 -- on écrit une fonction zonesDisjointes de Zone -> Zone -> Bool pour vérifier que deux zones sont disjointes 
 -- on rappele que deux zones sont disjointes si elles n'ont pas de collision
 --et puis  on utilise cette  fonction(zonesDisjointes) et on map sur toutes les zones de la ville pour vérifier que toutes les zones sont disjointes deux à deux 
-zonesDisjointes :: Zone -> Zone -> Bool
-zonesDisjointes z1 z2 =
-    not (collision  (zoneForme z1) (zoneForme z2))
+
 invariantZonesDisjointes :: Ville -> Bool
 invariantZonesDisjointes ville =
     all (\(zonId1, zone1) -> all (\(zonId2, zone2) -> zonId1 == zonId2 || zonesDisjointes zone1 zone2) (Map.toList (villeZones ville))) (Map.toList (villeZones ville))
@@ -79,7 +78,7 @@ invariantZonesDisjointes ville =
 
 
 
--- Création de la ville
+-- -- Création de la ville
 -- maVille2 = Ville {
 --     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD), (ZonId 5, zoneE)],
 --     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
@@ -118,14 +117,44 @@ villeVerifiantAdjacenceARoute ville =
 -- }
 
 
+-- zoneA = Eau (Rectangle (C 0 0) 1 1)
+-- zoneB = Route (Rectangle (C 2 0) 1 1)
+-- zoneC = ZoneResidentielle (Rectangle (C 4 0) 1 1) []
+-- zoneD = ZoneIndustrielle (Rectangle (C 0 2) 1 1) []
+-- zoneE = ZoneCommerciale (Rectangle (C 0 4) 1 1) []
+
+-- -- Création de la première ville
+-- villeExemple = Ville {
+--     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD), (ZonId 5, zoneE)],
+--     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
+-- }
+-- Vérifie si une liste de zones est une séquence de zones de route connexes
+estRouteConnexe :: [Zone] -> Ville -> Bool
+estRouteConnexe [] _ = True
+estRouteConnexe [_] _ = True
+estRouteConnexe (z1:z2:zs) ville = estAdjacenteARoute z1 ville && estRouteConnexe (z2:zs) ville
+
+-- Vérifie si les routes sont connexes dans la ville
+routesConnexes :: Ville -> Bool
+routesConnexes ville =
+    let zonesRoute = Map.filter (\z -> case z of Route _ -> True; _ -> False) (villeZones ville)
+        listZonesRoute = Map.elems zonesRoute
+    in
+        estRouteConnexe listZonesRoute ville
+
+-- Création de zones pour la ville
 zoneA = Eau (Rectangle (C 0 0) 1 1)
 zoneB = Route (Rectangle (C 2 0) 1 1)
-zoneC = ZoneResidentielle (Rectangle (C 4 0) 1 1) []
-zoneD = ZoneIndustrielle (Rectangle (C 0 2) 1 1) []
-zoneE = ZoneCommerciale (Rectangle (C 0 4) 1 1) []
+zoneC = Route (Rectangle (C 4 0) 1 1)
+zoneD = Route (Rectangle (C 6 0) 1 1)
+zoneE = Eau (Rectangle (C 0 2) 1 1)
+zoneF = Route (Rectangle (C 2 2) 1 1)
+zoneG = Eau (Rectangle (C 4 2) 1 1)
+zoneH = Route (Rectangle (C 6 2) 1 1)
 
--- Création de la première ville
-villeExemple = Ville {
-    villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD), (ZonId 5, zoneE)],
-    villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
+-- Création de la ville
+v = Ville {
+    villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD),
+                               (ZonId 5, zoneE), (ZonId 6, zoneF), (ZonId 7, zoneG), (ZonId 8, zoneH)],
+    villeCitoyens = Map.empty
 }
