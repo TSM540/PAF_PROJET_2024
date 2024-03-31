@@ -34,7 +34,8 @@ forme1 = HSegement (C 1 2) 5
 -- forme3 = Rectangle (C 0 0) 10 5
 -- >>> limites forme3 
 -- (0, 10, 0, 5)
-
+-- NB on peut utiliser la fonction limites sans trop se casser la tête avec le type de la forme
+-- c'est une meilleure solution mais j'ai préféré re-utiliser le code juste pour débugger
 appartient :: Coord -> Forme -> Bool
 appartient (C x y) (HSegement (C x' y') l) = (y == y') && (x >= x') && (x <= x+l)
 appartient (C x y) (VSegement (C x' y') l) = (x == x') &&(y >= y') && (y <= y+l)
