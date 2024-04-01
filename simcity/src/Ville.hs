@@ -283,7 +283,7 @@ postcondition_ConstruitBatiment ville zone zonId batiment nouvelleZone nouvelleV
     zoneConstructionCorrect nouvelleZone
     &&
     not (batimentDejaPresent nouvelleVille nouvelleZone batiment)
-    && 
+    &&
     batimentNonPresentDansAutresZones nouvelleVille zonId nouvelleZone batiment
 
 batimentNonPresentDansAutresZones :: Ville -> ZonId -> Zone -> Batiment -> Bool
@@ -317,6 +317,24 @@ batimentNonPresentDansAutresZones v id z b =
 
 
 
+-- : invariant des batiments
+
+invariantBatiments :: Ville -> Bool
+invariantBatiments v =
+    all (\(zid, z) -> case z of
+                        ZoneResidentielle _ batiments -> all (batimentDansZone v zid) batiments
+                        ZoneIndustrielle _ batiments -> all (batimentDansZone v zid) batiments
+                        ZoneCommerciale _ batiments -> all (batimentDansZone v zid) batiments
+                        Admin _ b -> batimentDansZone v zid b
+                        _ -> True) (Map.toList (villeZones v))
+
+batimentDansZone :: Ville -> ZonId -> Batiment -> Bool
+batimentDansZone v zid b =
+    case b of
+        Cabane _ zid' _ _ _ -> zid == zid'
+        Atelier _ zid' _ _ _ -> zid == zid'
+        Epicerie _ zid' _ _ _ -> zid == zid'
+        Commissariat _ zid' _ -> zid == zid'
 
 
 
