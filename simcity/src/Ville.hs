@@ -293,28 +293,28 @@ batimentNonPresentDansAutresZones v id z b =
         (Map.toList  (villeZones v))
 
 
-ville = Ville {
-  villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
-  villeCitoyens = Map.empty
-}
+-- ville = Ville {
+--   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
+--   villeCitoyens = Map.empty
+-- }
 
-zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
-zone2 = Route (Rectangle (C 10 0) 5 10)
+-- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
+-- zone2 = Route (Rectangle (C 10 0) 5 10)
 
-batiment = Cabane {
-  forme = Rectangle (C 5 5) 3 3,
-  zoneId = ZonId 1,  -- ZoneId du bâtiment, initialement la zone cible
-  entree = C 5 8,
-  capacite = 10,
-  habitants = []
-}
+-- batiment = Cabane {
+--   forme = Rectangle (C 5 5) 3 3,
+--   zoneId = ZonId 1,  -- ZoneId du bâtiment, initialement la zone cible
+--   entree = C 5 8,
+--   capacite = 10,
+--   habitants = []
+-- }
 
-nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
+-- nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
 
--- >>> precondition_ConstruitBatiment ville zone1 batiment
--- True
--- >>> postcondition_ConstruitBatiment ville zone1 (ZonId 1) batiment  zone1 nouvelleVille
--- True
+-- -- >>> precondition_ConstruitBatiment ville zone1 batiment
+-- -- True
+-- -- >>> postcondition_ConstruitBatiment ville zone1 (ZonId 1) batiment  zone1 nouvelleVille
+-- -- True
 
 
 
@@ -336,6 +336,114 @@ batimentDansZone v zid b =
         Atelier _ zid' _ _ _ -> zid == zid'
         Epicerie _ zid' _ _ _ -> zid == zid'
         Commissariat _ zid' _ -> zid == zid'
+
+-- ! Suppresion d'un batiment
+
+supprimerBatiment :: ZonId -> Zone -> Ville -> Ville
+supprimerBatiment zonId zone ville =
+    let nouvelleZone = case zone of
+                        ZoneResidentielle _ batiments -> ZoneResidentielle (zoneForme zone) (supprimerBatimentDansListe batiments zonId)
+                        ZoneIndustrielle _ batiments -> ZoneIndustrielle (zoneForme zone) (supprimerBatimentDansListe batiments zonId)
+                        ZoneCommerciale _ batiments -> ZoneCommerciale (zoneForme zone) (supprimerBatimentDansListe batiments zonId)
+                        Admin _ batimentUnique -> Admin (zoneForme zone) batimentUnique
+                        _ -> zone
+        zonesMisesAJour = remplacerZone zonId nouvelleZone (villeZones ville)
+    in ville { villeZones = zonesMisesAJour }
+
+supprimerBatimentDansListe :: [Batiment] -> ZonId -> [Batiment]
+supprimerBatimentDansListe [] _ = []
+supprimerBatimentDansListe (b:bs) zonId =
+    if zonId == zoneIdBatiment b then bs else b : supprimerBatimentDansListe bs zonId
+
+zoneIdBatiment :: Batiment -> ZonId
+zoneIdBatiment batiment = case batiment of
+  Cabane {zoneId = zid} -> zid
+  Atelier {zoneId = zid} -> zid
+  Epicerie {zoneId = zid} -> zid
+  Commissariat {zoneId = zid} -> zid
+  _ -> error "Unexpected building type"
+
+
+-- ville = Ville {
+--   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
+--   villeCitoyens = Map.empty
+-- }
+
+-- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) [batiment1, batiment2]
+-- zone2 = Route (Rectangle (C 10 0) 5 10)
+
+-- batiment1 = Cabane {
+--   forme = Rectangle (C 1 1) 3 3,
+--   zoneId = ZonId 1,
+--   entree = C 5 8,
+--   capacite = 10,
+--   habitants = []
+-- }
+
+-- batiment2 = Atelier {
+--   forme = Rectangle (C 6 6) 4 4,
+--   zoneId = ZonId 1,
+--   entree = C 6 10,
+--   capacite = 15,
+--   employes = []
+-- }
+
+-- nouvelleVille = supprimerBatiment (zoneIdBatiment batiment1) zone1 ville
+-- >>> show ville 
+-- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 2 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
+
+
+-- >>> show nouvelleVille
+-- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 1 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
+
+preconditionSupprimerBatiment :: Ville -> ZonId -> Zone -> Batiment -> Bool
+preconditionSupprimerBatiment ville zonId z batiment =
+  batimentDansZone ville zonId batiment &&
+  case z of
+    ZoneResidentielle _ _ -> True
+    ZoneIndustrielle _ _ -> True
+    ZoneCommerciale _ _ -> True
+    _ -> False
+
+
+postconditionSupprimerBatiment :: Ville -> ZonId -> Zone -> Batiment -> Ville -> Bool
+postconditionSupprimerBatiment ville zonId zone batiment nouvelleVille =
+--   batimentDansZone nouvelleVille zonId batiment
+    batimentDansZone nouvelleVille zonId batiment
+
+
+
+-- -- test
+-- ville = Ville {
+--   villeZones = Map.fromList [(ZonId 1, zone1)],
+--   villeCitoyens = Map.empty
+-- }
+
+-- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) [batiment1, batiment2]
+
+-- batiment1 = Cabane {
+--   forme = Rectangle (C 0 0) 3 3,
+--   zoneId = ZonId 1,
+--   entree = C 0 3,
+--   capacite = 10,
+--   habitants = []
+-- }
+
+-- batiment2 = Atelier {
+--   forme = Rectangle (C 6 6) 4 4,
+--   zoneId = ZonId 1,
+--   entree = C 6 10,
+--   capacite = 15,
+--   employes = []
+-- }
+
+-- -- >>> preconditionSupprimerBatiment ville (ZonId 1) zone1 batiment1
+-- -- True
+
+-- nouvelleVille = supprimerBatiment (zoneIdBatiment batiment1) zone1 ville
+
+-- -- >>> postconditionSupprimerBatiment ville (ZonId 1) zone1 batiment1 nouvelleVille
+-- -- True
 
 
 
