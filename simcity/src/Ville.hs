@@ -1,11 +1,12 @@
-module Ville where 
+module Ville where
 
-import Zone 
+import Zone
 import Citoyen
 import Types
 import Forme
 import Data.Map as Map
 import Occupation
+import Batiment
 
 -- données
 data Ville = Ville {
@@ -56,7 +57,7 @@ citoyen3 = Emigrant (C 5 5) FaireCourses
 -- maVille :: Ville
 -- invariant 
 invariantVille :: Ville -> Bool
-invariantVille  v=  
+invariantVille  v=
             invariantZonesDisjointes v &&
             villeVerifiantAdjacenceARoute v
             && routesConnexes v
@@ -193,5 +194,52 @@ postconditionConstruit ville zone villeApres =
 
 
 
+-- ! Batiments 
 
-   
+
+-- ! Créer un batiment
+
+construireBatiment :: Batiment -> Zone -> ZonId -> Ville -> Ville
+construireBatiment batiment zone zonId ville =
+    let formeZone = zoneForme zone
+        nouvelleZone = case zone of
+            Eau _ -> Eau formeZone
+            Route _ -> Eau formeZone
+            ZoneResidentielle _ batiments -> ZoneResidentielle formeZone (batiment : batiments)
+            ZoneIndustrielle _ batiments -> ZoneIndustrielle formeZone (batiment : batiments)
+            ZoneCommerciale _ batiments -> ZoneCommerciale formeZone (batiment : batiments)
+            Admin _ _ -> Admin formeZone batiment
+        zonesMisesAJour = remplacerZone zonId nouvelleZone (villeZones ville)
+    in ville { villeZones = zonesMisesAJour }
+
+
+-- rajouter le batiment dans la zeone
+remplacerZone :: ZonId -> Zone -> Map ZonId Zone -> Map ZonId Zone
+remplacerZone = Map.insert
+
+ville = Ville {
+  villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
+  villeCitoyens = Map.empty
+}
+
+zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
+zone2 = Route (Rectangle (C 10 0) 5 10)
+
+batiment = Cabane {
+  forme = Rectangle (C 5 5) 3 3,
+  zoneId = ZonId 1,
+  entree = C 5 8,
+  capacite = 10,
+  habitants = []
+}
+
+nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
+
+-- >>>invariantVille nouvelleVille
+-- True
+
+-- >>> show nouvelleVille
+-- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 1 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
+
+
+
