@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
+{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 module Ville where
 
 import Zone
@@ -217,29 +220,103 @@ construireBatiment batiment zone zonId ville =
 remplacerZone :: ZonId -> Zone -> Map ZonId Zone -> Map ZonId Zone
 remplacerZone = Map.insert
 
-ville = Ville {
-  villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
-  villeCitoyens = Map.empty
-}
+-- ville = Ville {
+--   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
+--   villeCitoyens = Map.empty
+-- }
 
-zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
-zone2 = Route (Rectangle (C 10 0) 5 10)
+-- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
+-- zone2 = Route (Rectangle (C 10 0) 5 10)
 
-batiment = Cabane {
-  forme = Rectangle (C 5 5) 3 3,
-  zoneId = ZonId 1,
-  entree = C 5 8,
-  capacite = 10,
-  habitants = []
-}
+-- batiment = Cabane {
+--   forme = Rectangle (C 5 5) 3 3,
+--   zoneId = ZonId 1,
+--   entree = C 5 8,
+--   capacite = 10,
+--   habitants = []
+-- }
 
-nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
+-- nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
 
 -- >>>invariantVille nouvelleVille
 -- True
 
 -- >>> show nouvelleVille
 -- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 1 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
+
+-- : pré/post/inv des batiments
+
+precondition_ConstruitBatiment :: Ville -> Zone  -> Batiment -> Bool
+precondition_ConstruitBatiment v z  b =
+    zoneConstructionCorrect z &&
+     not (batimentDejaPresent v z b )
+zoneConstructionCorrect :: Zone -> Bool
+zoneConstructionCorrect z =
+    case z of
+        ZoneResidentielle _ _ -> True
+        ZoneIndustrielle _ _ -> True
+        ZoneCommerciale _ _ -> True
+        Admin _ _ -> True
+        _ -> False
+
+batimentDejaPresent :: Ville -> Zone -> Batiment -> Bool
+batimentDejaPresent ville zone batiment =
+    case zone of
+        ZoneResidentielle _ batiments -> batimentDansListe batiments batiment
+        ZoneIndustrielle _ batiments -> batimentDansListe batiments batiment
+        ZoneCommerciale _ batiments -> batimentDansListe batiments batiment
+        Admin _ b -> batiment == b
+        -- Eau _ -> False
+        -- Route _ -> False
+        _ -> True
+
+batimentDansListe :: [Batiment] -> Batiment -> Bool
+batimentDansListe [] batiment = False
+batimentDansListe (b:bs) batiment =
+    (batiment == b) || batimentDansListe bs batiment
+
+
+-- post conditions
+
+postcondition_ConstruitBatiment :: Ville -> Zone -> ZonId -> Batiment ->Zone -> Ville -> Bool
+postcondition_ConstruitBatiment ville zone zonId batiment nouvelleZone nouvelleVille =
+    zoneConstructionCorrect nouvelleZone
+    &&
+    not (batimentDejaPresent nouvelleVille nouvelleZone batiment)
+    && 
+    batimentNonPresentDansAutresZones nouvelleVille zonId nouvelleZone batiment
+
+batimentNonPresentDansAutresZones :: Ville -> ZonId -> Zone -> Batiment -> Bool
+batimentNonPresentDansAutresZones v id z b =
+         all (\(zone, _) ->  not (batimentDejaPresent v z b))
+        (Map.toList  (villeZones v))
+
+
+-- ville = Ville {
+--   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
+--   villeCitoyens = Map.empty
+-- }
+
+-- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
+-- zone2 = Route (Rectangle (C 10 0) 5 10)
+
+-- batiment = Cabane {
+--   forme = Rectangle (C 5 5) 3 3,
+--   zoneId = ZonId 1,  -- ZoneId du bâtiment, initialement la zone cible
+--   entree = C 5 8,
+--   capacite = 10,
+--   habitants = []
+-- }
+
+-- nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
+
+-- >>> precondition_ConstruitBatiment ville zone1 batiment
+-- True
+-- >>> postcondition_ConstruitBatiment ville zone1 (ZonId 1) batiment  zone1 nouvelleVille
+-- True
+
+
+
 
 
 

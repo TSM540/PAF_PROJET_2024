@@ -28,6 +28,7 @@ data Batiment = Cabane {
                     zoneId :: ZonId,
                     entree :: Coord
                 }
+                deriving(Eq)
 
 
 -- instances
