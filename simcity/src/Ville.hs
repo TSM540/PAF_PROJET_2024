@@ -45,9 +45,9 @@ citoyensToString ((citId, citoyen):rest) =
 -- zone5 = ZoneCommerciale (Rectangle (C 0 15) 5 10) []
 
 -- Création de quelques citoyens
-citoyen1 = Immigrant (C 1 1) (1, 1, 1) Travailler
-citoyen2 = Habitant (C 3 3) (2, 2, 2) (BatId 1, Nothing, Nothing) Dormir
-citoyen3 = Emigrant (C 5 5) FaireCourses
+-- citoyen1 = Immigrant (C 1 1) (1, 1, 1) Travailler
+-- citoyen2 = Habitant (C 3 3) (2, 2, 2) (BatId 1, Nothing, Nothing) Dormir
+-- citoyen3 = Emigrant (C 5 5) FaireCourses
 
 -- -- Création de la ville
 -- maVille = Ville {
@@ -64,6 +64,7 @@ invariantVille  v=
             invariantZonesDisjointes v &&
             villeVerifiantAdjacenceARoute v
             && routesConnexes v
+            && invariantBatiments v
 
 --  toutes les zones soit disjointes deux `a deux
 -- on écrit une fonction zonesDisjointes de Zone -> Zone -> Bool pour vérifier que deux zones sont disjointes 
@@ -292,23 +293,23 @@ batimentNonPresentDansAutresZones v id z b =
         (Map.toList  (villeZones v))
 
 
--- ville = Ville {
---   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
---   villeCitoyens = Map.empty
--- }
+ville = Ville {
+  villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
+  villeCitoyens = Map.empty
+}
 
--- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
--- zone2 = Route (Rectangle (C 10 0) 5 10)
+zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
+zone2 = Route (Rectangle (C 10 0) 5 10)
 
--- batiment = Cabane {
---   forme = Rectangle (C 5 5) 3 3,
---   zoneId = ZonId 1,  -- ZoneId du bâtiment, initialement la zone cible
---   entree = C 5 8,
---   capacite = 10,
---   habitants = []
--- }
+batiment = Cabane {
+  forme = Rectangle (C 5 5) 3 3,
+  zoneId = ZonId 1,  -- ZoneId du bâtiment, initialement la zone cible
+  entree = C 5 8,
+  capacite = 10,
+  habitants = []
+}
 
--- nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
+nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
 
 -- >>> precondition_ConstruitBatiment ville zone1 batiment
 -- True
