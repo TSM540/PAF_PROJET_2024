@@ -68,25 +68,25 @@ retirerCitoyen (Epicerie forme zoneId entree capacite clients) citId = Epicerie 
 retirerCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
 
 
--- des exemples
-cabane = Cabane (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 []
--- capacité est de 10
-new = ajouterCapacite cabane 5
--- >>> show new
--- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 15 et 0 habitants"
-new' = diminuerCapacite new 5
--- >>> show new'
--- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 habitants"
-new'_ = diminuerCapacite new 20
--- >>> show new'_
--- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 0 et 0 habitants"
-citoyen1 = CitId 1
+-- -- des exemples
+-- cabane = Cabane (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 []
+-- -- capacité est de 10
+-- new = ajouterCapacite cabane 5
+-- -- >>> show new
+-- -- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 15 et 0 habitants"
+-- new' = diminuerCapacite new 5
+-- -- >>> show new'
+-- -- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 habitants"
+-- new'_ = diminuerCapacite new 20
+-- -- >>> show new'_
+-- -- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 0 et 0 habitants"
+-- citoyen1 = CitId 1
 
-new'' = ajouterCitoyen cabane citoyen1
+-- new'' = ajouterCitoyen cabane citoyen1
 
--- >>> show new''
--- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 1 habitants"
-new''' = retirerCitoyen new'' citoyen1
--- >>> show new'''
--- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 habitants"
+-- -- >>> show new''
+-- -- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 1 habitants"
+-- new''' = retirerCitoyen new'' citoyen1
+-- -- >>> show new'''
+-- -- "Cabane Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 habitants"
 
