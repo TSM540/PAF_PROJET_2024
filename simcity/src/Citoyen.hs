@@ -7,6 +7,7 @@ import Types
 data Citoyen =    Immigrant   Personne Vie   
                 | Habitant    Personne  Vie ViePersonnelle
                 | Emigrant    Personne   
+            deriving(Eq)
 
 -- instance Citoyen 
 

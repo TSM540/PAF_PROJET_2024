@@ -5,6 +5,7 @@ data Occupation =
         | Dormir Int -- nombre d'heures
         | FaireCourses Float -- Prix des courses 
         | SeDeplacer Coord 
+        deriving(Eq)
 
 -- instance de Occupation
 instance Show Occupation where

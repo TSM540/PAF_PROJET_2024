@@ -5,39 +5,42 @@ import Occupation
 newtype BatId = BatId Int deriving (Show,Eq, Ord)
 newtype ZonId = ZonId Int  deriving (Show,Eq, Ord)
 newtype CitId = CitId Int  deriving (Show,Eq, Ord)
-
+newtype PrefId = PrefId Int  deriving (Show,Eq, Ord)
 
 -- nationalité
 data Nationalite = Francais 
-                    | Etranger TypeSejour deriving (Show)
+                    | Etranger TypeSejour deriving (Show,Eq)
 
 data TypeSejour = 
       Etudiant AnsSejour Diplome
       | Salarie AnsResidence
-      deriving (Show)
+      deriving (Show,Eq)
 
 data Diplome = Obtenu 
-            | EnCours AnneesEtudesPrevu deriving (Show)
-newtype AnsSejour = AnsSejour Int deriving (Show)
-newtype AnsResidence = AnsResidence Int deriving (Show)
-newtype AnneesEtudesPrevu = AnneesEtudesPrevu Int deriving (Show)
+            | EnCours AnneesEtudesPrevu deriving (Show,Eq,Ord)
+newtype AnsSejour = AnsSejour Integer deriving (Show,Eq,Ord)
+newtype AnsResidence = AnsResidence Integer deriving (Show,Eq,Ord)
+newtype AnneesEtudesPrevu = AnneesEtudesPrevu Integer deriving (Show,Eq,Ord)
+
+
 
 data Personne = Personne {
+                    idCit :: CitId,
                     coord :: Coord,
                     occupation :: Occupation,
                     crimes :: [String],
                     nationalite :: Nationalite
-                } deriving (Show)
+                } deriving (Show,Eq)
 
 
 data Vie = Vie {
                 argentEnBanque:: Float,
-                sante :: Int,
-                niveauFaim:: Int
-} deriving (Show)
+                sante :: Integer,
+                niveauFaim:: Integer
+} deriving (Show,Eq)
 data ViePersonnelle = ViePersonnelle {
            maison :: BatId,
            travail :: Maybe BatId,
            courses :: Maybe BatId
-}deriving (Show)
+}deriving (Show,Eq)
 
