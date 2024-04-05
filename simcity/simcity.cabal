@@ -29,6 +29,7 @@ library
       Citoyen
       Forme
       Occupation
+      Prefecture
       Types
       Ville
       Zone
@@ -61,6 +62,8 @@ test-suite simcity-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      FormSpec
+      VilleSpec
       Paths_simcity
   autogen-modules:
       Paths_simcity

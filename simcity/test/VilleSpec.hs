@@ -1,4 +1,4 @@
-module VilleSpec (spec) where
+module VilleSpec where
 
 import Test.Hspec
 import Ville
@@ -20,3 +20,4 @@ spec = do
           villeApresConstruit = construit villeInitiale zoneAAjouter
       Map.size (villeZones villeApresConstruit) `shouldBe` 1
       Map.lookup (prochainZonId villeInitiale) (villeZones villeApresConstruit) `shouldBe` Just zoneAAjouter
+

@@ -1,7 +1,6 @@
 module Batiment where
 import Forme
 import Types
-
 data Batiment = Cabane {
                     forme :: Forme,
                     zoneId :: ZonId,
