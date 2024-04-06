@@ -16,7 +16,9 @@ instance Show Occupation where
   show (Dormir h) = "Dormir " ++ show h ++ " heures"
   show (FaireCourses c) = "Faire des courses d'un montant de " ++ show c ++ "€"
   show (SeDeplacer coord) = "Se déplacer vers " ++ show coord
-
+  show ALaMaison = "Rester à la maison"
+  show Manger = "Manger"
+  show Cuisiner = "Cuisiner"  
 
 sommeJournaliere :: Occupation -> Float
 sommeJournaliere (Travailler s) = s
