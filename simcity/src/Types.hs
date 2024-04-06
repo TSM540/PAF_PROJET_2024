@@ -36,7 +36,8 @@ data Personne = Personne {
 data Vie = Vie {
                 argentEnBanque:: Float,
                 sante :: Integer,
-                niveauFaim:: Integer
+                niveauFaim:: Integer,
+                niveauFatigue:: Integer
 } deriving (Show,Eq)
 data ViePersonnelle = ViePersonnelle {
            maison :: BatId,

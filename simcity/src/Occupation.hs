@@ -5,6 +5,9 @@ data Occupation =
         | Dormir Int -- nombre d'heures
         | FaireCourses Float -- Prix des courses 
         | SeDeplacer Coord 
+        | ALaMaison
+        | Manger 
+        | Cuisiner 
         deriving(Eq)
 
 -- instance de Occupation
@@ -14,3 +17,6 @@ instance Show Occupation where
   show (FaireCourses c) = "Faire des courses d'un montant de " ++ show c ++ "€"
   show (SeDeplacer coord) = "Se déplacer vers " ++ show coord
 
+
+sommeJournaliere :: Occupation -> Float
+sommeJournaliere (Travailler s) = s
