@@ -56,7 +56,7 @@ data Batiment = Cabane {
                     zoneId :: ZonId,
                     entree :: Coord,
                     capacite :: Int,  -- Capacité maximale de clients que ce restaurant peut contenir
-                    clients :: [CitId]  -- Liste des citoyens clients de ce restaurant
+                    clients :: [CitId]  -- Liste des citoyens clients de ce restaurant de la journée
                 }
               | Banque {
                     idBanque :: BankId,
@@ -216,3 +216,37 @@ bob = Habitant p2 v2 vp2
 (bk1,bk2,cit1,cit2) = virementBancaire banque1 10 banque1 alice bob
 --  >>> show cit2
 -- "Habitant : Personne {idCit = CitId 2, coord = C {cx = 2, cy = 2}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais}, Vie : Vie {argentEnBanque = 510.0, sante = 80, niveauFaim = 0, niveauFatigue = 0}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
+
+
+-- ! invariants 
+
+
+invariantBatiment :: Batiment -> Bool
+invariantBatiment b = condBatiment b && capacitePositive b 
+
+
+condBatiment :: Batiment -> Bool
+condBatiment (Cabane _ _ _ capacite habitants) = length habitants <= capacite
+condBatiment (Atelier _ _ _ capacite employes) = length employes <= capacite
+condBatiment (Epicerie _ _ _ capacite clients) = length clients <= capacite
+condBatiment (Ecole _ _ _ capacite eleves) = length eleves <= capacite
+condBatiment (Hopital _ _ _ capacite patients) = length patients <= capacite
+condBatiment (Cinema _ _ _ capacite spectateurs) = length spectateurs <= capacite
+condBatiment (Restaurant _ _ _ capacite clients) = length clients <= capacite
+condBatiment _ = error "ce batiment n'a pas de capacité"
+
+-- * la capacité d'un batiment ne peut pas être négative ou  infinie
+capacitePositive :: Batiment -> Bool
+capacitePositive (Cabane _ _ _ capacite _) = capacite > 0 ||  capacite /= maxBound
+capacitePositive (Atelier _ _ _ capacite _) = capacite > 0   ||  capacite /= maxBound
+capacitePositive (Epicerie _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive (Ecole _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive (Hopital _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive (Cinema _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive (Restaurant _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive _ = error "ce batiment n'a pas de capacité"
+
+
+
+
+
