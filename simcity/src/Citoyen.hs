@@ -3,7 +3,6 @@ import Forme
 import Occupation
 import Types
 
-
 data Citoyen =    Immigrant   Personne Vie   
                 | Habitant    Personne  Vie ViePersonnelle
                 | Emigrant    Personne   
@@ -272,4 +271,11 @@ manger (Habitant (Personne id c o cri nat) (Vie argent sante nivFaim nivFatigue)
 cuisiner :: Citoyen -> Citoyen
 cuisiner (Habitant (Personne id c o cri nat) (Vie argent sante nivFaim nivFatigue) vp) = 
                     Habitant (Personne id c Cuisiner cri nat) (Vie argent sante nivFaim (min (nivFatigue+5) 100)) vp
-                                                    
+
+-- virementBancaire :: Citoyen -> Float -> Citoyen-> Maybe (Citoyen,Citoyen)
+
+-- virementBancaire (Habitant (Personne id c o cri nat) (Vie argent sante nivFaim nivFatigue) vp) 
+--                     montant 
+--                   (Habitant (Personne id' c' o' cri' nat') (Vie argent' sante' nivFaim' nivFatigue') vp') = 
+--                     if argent < montant then Nothing 
+--                      else Just (Habitant (Personne id c o cri nat) (Vie (argent - montant) sante nivFaim nivFatigue) vp, Habitant (Personne id' c' o' cri' nat') (Vie (argent' + montant) sante' nivFaim' nivFatigue') vp')

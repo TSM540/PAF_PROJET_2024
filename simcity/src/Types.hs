@@ -6,6 +6,8 @@ newtype BatId = BatId Int deriving (Show,Eq, Ord)
 newtype ZonId = ZonId Int  deriving (Show,Eq, Ord)
 newtype CitId = CitId Int  deriving (Show,Eq, Ord)
 newtype PrefId = PrefId Int  deriving (Show,Eq, Ord)
+newtype BankId = BankId Int  deriving (Show,Eq, Ord)
+
 
 -- nationalité
 data Nationalite = Francais 
