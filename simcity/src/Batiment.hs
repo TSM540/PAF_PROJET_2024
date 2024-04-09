@@ -4,6 +4,7 @@ import Types
 import Citoyen
 import Prefecture
 import Occupation -- can be deleted
+import Produit
 data Batiment = Cabane {
                     forme :: Forme,
                     zoneId :: ZonId,
@@ -23,7 +24,9 @@ data Batiment = Cabane {
                     zoneId :: ZonId,
                     entree :: Coord,
                     capacite :: Int,  -- Capacité maximale de clients que cette épicerie peut contenir
-                    clients :: [CitId]  -- Liste des citoyens clients de cette épicerie
+                    clients :: [CitId],  -- Liste des citoyens clients de cette épicerie
+                    stock :: StockProduit
+
                 }
               | Commissariat {
                     forme :: Forme,
@@ -81,7 +84,7 @@ data Batiment = Cabane {
 instance Show Batiment where
     show (Cabane forme zoneId _ capacite habitants) = "Cabane " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length habitants) ++ " habitants"
     show (Atelier forme zoneId _ capacite employes) = "Atelier " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length employes) ++ " employés"
-    show (Epicerie forme zoneId _ capacite clients) = "Epicerie " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length clients) ++ " clients"
+    show (Epicerie forme zoneId _ capacite clients  s) = "Epicerie " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length clients) ++ " clients" ++  " et " ++ show s ++ " stock"
     show (Commissariat forme zoneId _) = "Commissariat " ++ show forme ++ " dans la zone " ++ show zoneId
     show (Ecole forme zoneId _ capacite eleves) = "Ecole " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length eleves) ++ " élèves"
     show (Hopital forme zoneId _ capacite patients) = "Hopital " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length patients) ++ " patients"
@@ -97,7 +100,7 @@ instance Show Batiment where
 ajouterCapacite :: Batiment -> Int -> Batiment
 ajouterCapacite (Cabane forme zoneId entree capacite habitants) n = Cabane forme zoneId entree (capacite + n) habitants
 ajouterCapacite (Atelier forme zoneId entree capacite employes) n = Atelier forme zoneId entree (capacite + n) employes
-ajouterCapacite (Epicerie forme zoneId entree capacite clients) n = Epicerie forme zoneId entree (capacite + n) clients
+ajouterCapacite (Epicerie forme zoneId entree capacite clients  s) n = Epicerie forme zoneId entree (capacite + n) clients  s
 ajouterCapacite (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
 ajouterCapacite (Ecole forme zoneId entree capacite eleves) n = Ecole forme zoneId entree (capacite + n) eleves
 ajouterCapacite (Hopital forme zoneId entree capacite patients) n = Hopital forme zoneId entree (capacite + n) patients
@@ -108,7 +111,7 @@ diminuerCapacite :: Batiment -> Int -> Batiment
 diminuerCapacite (Cabane forme zoneId entree capacite habitants) n = Cabane forme zoneId entree (max (capacite - n) 0) habitants
   --                                                                                        le max c'est juste pour ne pas avoir des valeurs négatives
 diminuerCapacite (Atelier forme zoneId entree capacite employes) n = Atelier forme zoneId entree (max (capacite - n) 0) employes
-diminuerCapacite (Epicerie forme zoneId entree capacite clients) n = Epicerie forme zoneId entree (max (capacite - n) 0) clients
+diminuerCapacite (Epicerie forme zoneId entree capacite clients  s) n = Epicerie forme zoneId entree (max (capacite - n) 0) clients  s
 diminuerCapacite (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
 diminuerCapacite (Ecole forme zoneId entree capacite eleves) n = Ecole forme zoneId entree (max (capacite - n) 0) eleves
 diminuerCapacite (Hopital forme zoneId entree capacite patients) n = Hopital forme zoneId entree (max (capacite - n) 0) patients
@@ -118,13 +121,13 @@ diminuerCapacite (Restaurant forme zoneId entree capacite clients) n = Restauran
 ajouterCitoyen :: Batiment -> CitId -> Batiment
 ajouterCitoyen (Cabane forme zoneId entree capacite habitants) citId = Cabane forme zoneId entree capacite (citId:habitants)
 ajouterCitoyen (Atelier forme zoneId entree capacite employes) citId = Atelier forme zoneId entree capacite (citId:employes)
-ajouterCitoyen (Epicerie forme zoneId entree capacite clients) citId = Epicerie forme zoneId entree capacite (citId:clients)
+ajouterCitoyen (Epicerie forme zoneId entree capacite clients  s) citId = Epicerie forme zoneId entree capacite (citId:clients)  s
 ajouterCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
 
 retirerCitoyen :: Batiment -> CitId -> Batiment
 retirerCitoyen (Cabane forme zoneId entree capacite habitants) citId = Cabane forme zoneId entree capacite (filter (/= citId) habitants)
 retirerCitoyen (Atelier forme zoneId entree capacite employes) citId = Atelier forme zoneId entree capacite (filter (/= citId) employes)
-retirerCitoyen (Epicerie forme zoneId entree capacite clients) citId = Epicerie forme zoneId entree capacite (filter (/= citId) clients)
+retirerCitoyen (Epicerie forme zoneId entree capacite clients  s) citId = Epicerie forme zoneId entree capacite (filter (/= citId) clients)  s
 retirerCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
 
 
@@ -169,11 +172,11 @@ virementBanqueVersBanque (Banque id forme zoneId entree argent clients) montant 
         else Just (Banque id forme zoneId entree (argent - montant) clients, Banque id' forme' zoneId' entree' (argent' + montant) clients')
 
 virementCitoyenVersCitoyen :: Citoyen -> Float -> Citoyen-> Maybe (Citoyen,Citoyen)
-virementCitoyenVersCitoyen (Habitant (Personne id c o cri nat) (Vie argent sante nivFaim nivFatigue) vp) 
+virementCitoyenVersCitoyen (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) 
                     montant 
-                  (Habitant (Personne id' c' o' cri' nat') (Vie argent' sante' nivFaim' nivFatigue') vp') = 
+                  (Habitant (Personne id' c' o' cri' nat' m') (Vie argent' sante' nivFaim' nivFatigue') vp') = 
                     if argent < montant then Nothing 
-                     else Just (Habitant (Personne id c o cri nat) (Vie (argent - montant) sante nivFaim nivFatigue) vp, Habitant (Personne id' c' o' cri' nat') (Vie (argent' + montant) sante' nivFaim' nivFatigue') vp')
+                     else Just (Habitant (Personne id c o cri nat m) (Vie (argent - montant) sante nivFaim nivFatigue) vp, Habitant (Personne id' c' o' cri' nat' m') (Vie (argent' + montant) sante' nivFaim' nivFatigue') vp')
 
 -- recuperer les valeurs du maybe
 getFstMaybe :: Maybe (a,a) -> a
@@ -195,7 +198,8 @@ o1 = Travailler 100.0
 
 crimes1 =[]
 nat1 = Francais
-p1 = Personne cid1 c1 o1 crimes1 nat1
+m1 =[]
+p1 = Personne cid1 c1 o1 crimes1 nat1 m1
 v1 = Vie 500 80 0 0
 vp1 = ViePersonnelle (BatId 1) (Just (BatId 2)) (Just (BatId 3))
 alice = Habitant p1 v1 vp1
@@ -208,7 +212,8 @@ o2 = Travailler 100.0
 
 crimes2 =[]
 nat2 = Francais
-p2 = Personne cid2 c2 o2 crimes2 nat2
+m2 =[]
+p2 = Personne cid2 c2 o2 crimes2 nat2 m2
 v2 = Vie 500 80 0 0
 vp2 = ViePersonnelle (BatId 1) (Just (BatId 2)) (Just (BatId 3))
 bob = Habitant p2 v2 vp2
@@ -228,7 +233,7 @@ invariantBatiment b = condBatiment b && capacitePositive b
 condBatiment :: Batiment -> Bool
 condBatiment (Cabane _ _ _ capacite habitants) = length habitants <= capacite
 condBatiment (Atelier _ _ _ capacite employes) = length employes <= capacite
-condBatiment (Epicerie _ _ _ capacite clients) = length clients <= capacite
+condBatiment (Epicerie _ _ _ capacite clients  _) = length clients <= capacite
 condBatiment (Ecole _ _ _ capacite eleves) = length eleves <= capacite
 condBatiment (Hopital _ _ _ capacite patients) = length patients <= capacite
 condBatiment (Cinema _ _ _ capacite spectateurs) = length spectateurs <= capacite
@@ -239,14 +244,48 @@ condBatiment _ = error "ce batiment n'a pas de capacité"
 capacitePositive :: Batiment -> Bool
 capacitePositive (Cabane _ _ _ capacite _) = capacite > 0 ||  capacite /= maxBound
 capacitePositive (Atelier _ _ _ capacite _) = capacite > 0   ||  capacite /= maxBound
-capacitePositive (Epicerie _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive (Epicerie _ _ _ capacite _  _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Ecole _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Hopital _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Cinema _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Restaurant _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive _ = error "ce batiment n'a pas de capacité"
 
+getCapacite :: Batiment -> Int
+getCapacite (Cabane _ _ _ capacite _) = capacite
+getCapacite (Atelier _ _ _ capacite _) = capacite
+getCapacite (Epicerie _ _ _ capacite _ _) = capacite
+getCapacite (Ecole _ _ _ capacite _) = capacite
+getCapacite (Hopital _ _ _ capacite _) = capacite
+
+ajouterPatient :: Batiment -> CitId -> Batiment
+ajouterPatient (Hopital f zid e capacite patients) citId = 
+                    let size = length patients in
+                    if size < capacite then Hopital f zid e capacite (citId:patients)
+                    else error "le batiment est plein"
+
+hospitaliser :: Citoyen -> Batiment -> Batiment
+hospitaliser (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) bat = 
+              case bat of 
+                Hopital f zid e capacite patients ->
+                          ajouterPatient (Hopital f zid e capacite patients) id
+                _ -> error "ce n'est pas un hopital" 
+
+sortirPatientDeL'Hopital :: CitId -> Batiment -> Batiment
+sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) = Hopital f zid e capacite (filter (/= citId) patients)
 
 
+-- vente de produit
+vendreProduit :: Batiment -> Produit -> (Batiment,Produit) 
+vendreProduit (Epicerie f zid e capacite clients stock) produit = 
+              let (foundProduct,foundQuantity) = getProduitQuantite stock produit in
+             if foundQuantity == Quantite 0 then error "le produit n'est pas disponible"
+             else 
+                (Epicerie f zid e capacite clients (removeProduct stock produit), foundProduct)
+
+
+
+
+                    
 
 

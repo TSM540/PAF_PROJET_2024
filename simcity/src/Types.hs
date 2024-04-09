@@ -1,12 +1,14 @@
 module Types where 
 import Forme
 import Occupation
+import Maladies
 -- ce module est définie pour éviter les dépendances circulaires entre les modules
 newtype BatId = BatId Int deriving (Show,Eq, Ord)
 newtype ZonId = ZonId Int  deriving (Show,Eq, Ord)
 newtype CitId = CitId Int  deriving (Show,Eq, Ord)
 newtype PrefId = PrefId Int  deriving (Show,Eq, Ord)
 newtype BankId = BankId Int  deriving (Show,Eq, Ord)
+newtype ProdId = ProdId Int  deriving (Show,Eq, Ord)
 
 
 -- nationalité
@@ -23,7 +25,7 @@ data Diplome = Obtenu
 newtype AnsSejour = AnsSejour Integer deriving (Show,Eq,Ord)
 newtype AnsResidence = AnsResidence Integer deriving (Show,Eq,Ord)
 newtype AnneesEtudesPrevu = AnneesEtudesPrevu Integer deriving (Show,Eq,Ord)
-
+newtype Pays = Pays String deriving (Show,Eq,Ord)
 
 
 data Personne = Personne {
@@ -31,7 +33,8 @@ data Personne = Personne {
                     coord :: Coord,
                     occupation :: Occupation,
                     crimes :: [String],
-                    nationalite :: Nationalite
+                    nationalite :: Nationalite,
+                    maladies :: [Maladie]
                 } deriving (Show,Eq)
 
 

@@ -334,7 +334,7 @@ batimentDansZone v zid b =
     case b of
         Cabane _ zid' _ _ _ -> zid == zid'
         Atelier _ zid' _ _ _ -> zid == zid'
-        Epicerie _ zid' _ _ _ -> zid == zid'
+        Epicerie _ zid' _ _ _  _ -> zid == zid'
         Commissariat _ zid' _ -> zid == zid'
 
 -- ! Suppresion d'un batiment
