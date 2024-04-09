@@ -77,5 +77,19 @@ getProduite (p,_) = p
 
 getQuantite :: (Produit, Quantite) -> Quantite
 getQuantite (_,q) = q
--- invariants
+-- ! invariants
 
+invariantStockProduit :: StockProduit -> Bool
+invariantStockProduit  = stockEmptyOrPositif 
+
+-- les valeurs de quantité sont positives ou 0
+
+quantityEmptyOrPositif :: (Produit,Quantite) -> Bool
+quantityEmptyOrPositif (_,Quantite q) = q >= 0
+
+-- on map sur la liste de produit pour vérifier que les quantités sont positives ou 0
+stockEmptyOrPositif :: StockProduit -> Bool
+stockEmptyOrPositif (StockProduit []) = True
+stockEmptyOrPositif (StockProduit (x:xs)) = 
+                quantityEmptyOrPositif x 
+                && stockEmptyOrPositif (StockProduit xs)

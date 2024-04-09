@@ -281,7 +281,12 @@ vendreProduit (Epicerie f zid e capacite clients stock) produit =
               let (foundProduct,foundQuantity) = getProduitQuantite stock produit in
              if foundQuantity == Quantite 0 then error "le produit n'est pas disponible"
              else 
-                (Epicerie f zid e capacite clients (removeProduct stock produit), foundProduct)
+                if foundQuantity >= Quantite 1 then 
+                    (Epicerie f zid e capacite clients (removeProduct stock produit), foundProduct)
+                else 
+                    error "Valeur Negative"
+
+               
 
 
 
