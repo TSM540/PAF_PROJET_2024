@@ -276,7 +276,10 @@ hospitaliser (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim niv
                 _ -> error "ce n'est pas un hopital" 
 
 sortirPatientDeL'Hopital :: CitId -> Batiment -> Batiment
-sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) = Hopital f zid e capacite (filter (/= citId) patients)
+sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) =
+          if citId `elem` patients then
+           Hopital f zid e capacite (filter (/= citId) patients)
+           else error "le citoyen n'est pas hospitalisé dans cette hopital"
 
 
 -- vente de produit
@@ -316,7 +319,7 @@ vp = ViePersonnelle {
 
 citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
-
+id2 = CitId 2
 -- ! test des hopitaux 
 -- >>> getCapacite hopital
 -- 10
@@ -328,6 +331,12 @@ citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
 -- >>> show (hospitaliser Batiment.citoyen hopital)
 -- le citoyen est déjà hospitalisé
+
+-- >>> show (sortirPatientDeL'Hopital id1 hopital)
+-- "Hopital Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 patients"
+
+-- >>> show (sortirPatientDeL'Hopital id2 hopital)
+-- le citoyen n'est pas hospitalisé dans cette hopital
 
 
 -- ! test des produits
