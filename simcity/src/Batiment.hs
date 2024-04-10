@@ -178,6 +178,9 @@ creerPrefecture :: Prefecture -> Forme -> ZonId -> Coord -> Batiment
 creerPrefecture = Pref
 
 
+
+
+
 -- -- des exemples
 -- cabane = Cabane (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 []
 -- -- capacité est de 10
