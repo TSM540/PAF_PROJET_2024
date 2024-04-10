@@ -317,7 +317,7 @@ vp = ViePersonnelle {
 citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
 
--- ! les hopitaux
+-- ! test des hopitaux 
 -- >>> getCapacite hopital
 -- 10
 -- >>> invariantBatiment hopital
@@ -328,3 +328,7 @@ citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
 -- >>> show (hospitaliser Batiment.citoyen hopital)
 -- le citoyen est déjà hospitalisé
+
+
+-- ! test des produits
+
