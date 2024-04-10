@@ -32,13 +32,28 @@ maybeValue (Just a) = a -- note that Just a is wrapped
 maybeValue Nothing = error "Nothing value"
 
 creerImmigrant :: CitId -> Coord -> Occupation -> Nationalite -> Citoyen
-creerImmigrant id c o nat = undefined
+creerImmigrant id c o nat = Immigrant (Personne id c o [] nat []) (Vie 0 100 100 100)
+
+
+rajouterAnsSejour :: TypeSejour -> Integer -> TypeSejour
+rajouterAnsSejour (Etudiant (AnsSejour ans) d) annee = Etudiant (AnsSejour (ans + annee)) d
+rajouterAnsSejour (Salarie (AnsResidence ans)) annee = Salarie (AnsResidence (ans + annee))
+
+changerDiplomeVersObtenu :: TypeSejour -> TypeSejour
+changerDiplomeVersObtenu (Etudiant ansSejour _) = 
+         if ansSejour >= AnsSejour 1 then Etudiant ansSejour Obtenu
+          else error "L'étudiant n'a pas encore obtenu son diplome car il n'a pas étudier plus d'un ans"
+changerDiplomeVersObtenu _ = error "Le type de séjour n'est pas un étudiant"
+
+
 
 -- retourne la personne d'un citoyen
 getPersonne :: Citoyen -> Personne
 getPersonne  (Habitant p _ _) = p
 getPersonne  (Immigrant p _  ) = p
 getPersonne  (Emigrant p) = p
+
+
 
 -- retourner la vie d'un citoyen
 getVie :: Citoyen -> Vie
