@@ -322,3 +322,68 @@ guerirD'uneMaladie citoyen@(Habitant (Personne id c o cri nat m) (Vie argent san
             Infectieuse -> Habitant (Personne id c o cri nat (filter (/= maladie) m)) (Vie argent (min 100 (sante + 10)) nivFaim nivFatigue) vp
             Chronique -> Habitant (Personne id c o cri nat (filter (/= maladie) m)) (Vie argent sante nivFaim nivFatigue) vp
 
+
+
+--- Test des fonctions
+personne = Personne {
+  idCit = CitId 1,
+  coord = C 0 0,
+  occupation = Travailler 100.0,
+  crimes = [],
+  nationalite = Francais,
+  maladies = []
+}
+v = Vie {
+  argentEnBanque = 1000,
+  sante = 100,
+  niveauFaim = 50,
+  niveauFatigue = 50
+}
+vp = ViePersonnelle {
+  maison = BatId 1,
+  travail = Just (BatId 2),
+  courses = Just (BatId 3)
+} 
+
+citoyen = Habitant personne v vp
+destination = C 10 10
+
+maladie = Maladie {
+  nomMaladie = "Grippe",
+  symptomes = ["Fièvre", "Toux"],
+  traitement = "Repos",
+  typeMaladie = Infectieuse
+
+}
+
+produit = Produit {
+  idProd = ProdId 1,
+  nomProd = "Pain",
+  prixProd = 1.0,
+  typeProd = Alimentaire Pain Frais,
+  production = Local
+}
+
+-- >>> show $ seReveiller citoyen
+-- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Rester \224 la maison, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 50, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
+ 
+-- >>> show $ seDeplacer citoyen destination
+-- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 10, cy = 10}, occupation = Se d\233placer vers C {cx = 10, cy = 10}, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 50, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
+
+-- >>> show $ manger citoyen produit
+-- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Manger, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 0, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
+
+
+-- >>> :t cuisiner
+-- cuisiner :: Citoyen -> Produit -> (Citoyen, Produit)
+
+-- >>> show  ( cuisiner citoyen produit)
+-- "(Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Cuisiner, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 50, niveauFatigue = 55}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)},Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 1.0, typeProd = Alimentaire Pain Cuit, production = Local})"
+
+
+-- >>> show $ tomberMalade citoyen maladie
+-- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = [Maladie {nomMaladie = \"Grippe\", symptomes = [\"Fi\\232vre\",\"Toux\"], traitement = \"Repos\", typeMaladie = Infectieuse}]}, Vie : Vie {argentEnBanque = 1000.0, sante = 90, niveauFaim = 50, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
+
+
+-- >>> show $ guerirD'uneMaladie citoyen maladie
+-- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 50, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
