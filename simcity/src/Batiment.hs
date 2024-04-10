@@ -188,7 +188,7 @@ getSndMaybe (Just (_,b)) = b
 getSndMaybe Nothing = error "Nothing to get"
 
 
-
+-- tester les banques
 banque1 = Banque (BankId 1) (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 1000 []
 banque2 = Banque (BankId 1) (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 1000 []
 
@@ -261,14 +261,18 @@ getCapacite (Hopital _ _ _ capacite _) = capacite
 ajouterPatient :: Batiment -> CitId -> Batiment
 ajouterPatient (Hopital f zid e capacite patients) citId = 
                     let size = length patients in
-                    if size < capacite then Hopital f zid e capacite (citId:patients)
+                    if size < capacite then
+                      if citId `elem` patients then 
+                            error "le citoyen est déjà hospitalisé"
+                      else  
+                            Hopital f zid e capacite (citId:patients)
                     else error "le batiment est plein"
 
 hospitaliser :: Citoyen -> Batiment -> Batiment
 hospitaliser (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) bat = 
               case bat of 
                 Hopital f zid e capacite patients ->
-                          ajouterPatient (Hopital f zid e capacite patients) id
+                            ajouterPatient (Hopital f zid e capacite patients) id
                 _ -> error "ce n'est pas un hopital" 
 
 sortirPatientDeL'Hopital :: CitId -> Batiment -> Batiment
@@ -286,11 +290,41 @@ vendreProduit (Epicerie f zid e capacite clients stock) produit =
                 else 
                     error "Valeur Negative"
 
-               
 
 
+hopital = Hopital (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 [id1]
+id1 = CitId 1
+personne = Personne {
+  idCit = id1,
+  coord = C 0 0,
+  occupation = Travailler 100.0,
+  crimes = [],
+  nationalite = Francais,
+  maladies = []
+}
+v = Vie {
+  argentEnBanque = 1000,
+  sante = 100,
+  niveauFaim = 50,
+  niveauFatigue = 50
+}
+vp = ViePersonnelle {
+  maison = BatId 1,
+  travail = Just (BatId 2),
+  courses = Just (BatId 3)
+} 
+
+citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
 
-                    
+-- ! les hopitaux
+-- >>> getCapacite hopital
+-- 10
+-- >>> invariantBatiment hopital
+-- True
 
+-- >>> show (ajouterPatient hopital id1)
+-- le citoyen est déjà hospitalisé
 
+-- >>> show (hospitaliser Batiment.citoyen hopital)
+-- le citoyen est déjà hospitalisé
