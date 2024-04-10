@@ -75,6 +75,13 @@ data Batiment = Cabane {
                     zoneId :: ZonId,
                     entree :: Coord
                 }
+              | Maison {
+                    forme :: Forme,
+                    zoneId :: ZonId,
+                    entree :: Coord,
+                    capacite :: Int,  -- Capacité maximale de citoyens que cette maison peut contenir
+                    habitants :: [CitId]  -- Liste des citoyens habitant cette maison
+                }
 
                 deriving(Eq)
 
@@ -92,8 +99,8 @@ instance Show Batiment where
     show (Restaurant forme zoneId _ capacite clients) = "Restaurant " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length clients) ++ " clients"
     show (Banque idBanque forme zoneId _ argent clients) = "Banque " ++ show idBanque ++ " " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec un argent de " ++ show argent ++ " et " ++ show (length clients) ++ " clients"
     show (Pref pref forme zoneId _) = "Prefecture " ++ show pref ++ " " ++ show forme ++ " dans la zone " ++ show zoneId
+    show (Maison forme zoneId _ capacite habitants) = "Maison " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length habitants) ++ " habitants"
 
-    
 -- fonctions pour gérer notre batiment
 -- on a supposé que les seul modifications possibles sont les cas dessus car c'est plutot pas trop réel de changer le type d'un batiment ou son entrée
 -- voir qu'il y a des cas dans la vraie vie où on peut changer le type d'un batiment mais ce n'est pas un généralité
@@ -106,6 +113,7 @@ ajouterCapacite (Ecole forme zoneId entree capacite eleves) n = Ecole forme zone
 ajouterCapacite (Hopital forme zoneId entree capacite patients) n = Hopital forme zoneId entree (capacite + n) patients
 ajouterCapacite (Cinema forme zoneId entree capacite spectateurs) n = Cinema forme zoneId entree (capacite + n) spectateurs
 ajouterCapacite (Restaurant forme zoneId entree capacite clients) n = Restaurant forme zoneId entree (capacite + n) clients
+
 
 diminuerCapacite :: Batiment -> Int -> Batiment
 diminuerCapacite (Cabane forme zoneId entree capacite habitants) n = Cabane forme zoneId entree (max (capacite - n) 0) habitants
@@ -123,12 +131,51 @@ ajouterCitoyen (Cabane forme zoneId entree capacite habitants) citId = Cabane fo
 ajouterCitoyen (Atelier forme zoneId entree capacite employes) citId = Atelier forme zoneId entree capacite (citId:employes)
 ajouterCitoyen (Epicerie forme zoneId entree capacite clients  s) citId = Epicerie forme zoneId entree capacite (citId:clients)  s
 ajouterCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
+ajouterCitoyen (Ecole forme zoneId entree capacite eleves) citId = Ecole forme zoneId entree capacite (citId:eleves)
+ajouterCitoyen (Maison forme zoneId entree capacite habitants) citId = Maison forme zoneId entree capacite (citId:habitants)
+-- NB : pour l'hopital, on a une fonction spécifique pour ajouter un patient (voir cf . hospitaliser)
 
 retirerCitoyen :: Batiment -> CitId -> Batiment
 retirerCitoyen (Cabane forme zoneId entree capacite habitants) citId = Cabane forme zoneId entree capacite (filter (/= citId) habitants)
 retirerCitoyen (Atelier forme zoneId entree capacite employes) citId = Atelier forme zoneId entree capacite (filter (/= citId) employes)
 retirerCitoyen (Epicerie forme zoneId entree capacite clients  s) citId = Epicerie forme zoneId entree capacite (filter (/= citId) clients)  s
 retirerCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
+retirerCitoyen (Ecole forme zoneId entree capacite eleves) citId = Ecole forme zoneId entree capacite (filter (/= citId) eleves)
+retirerCitoyen (Maison forme zoneId entree capacite habitants) citId = Maison forme zoneId entree capacite (filter (/= citId) habitants)
+
+-- creer des batiments
+creerMaison :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerMaison forme zoneId entree capacite = Maison forme zoneId entree capacite []
+
+creerCabane :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerCabane forme zoneId entree capacite = Cabane forme zoneId entree capacite []
+
+creerAtelier :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerAtelier forme zoneId entree capacite = Atelier forme zoneId entree capacite []
+
+creerEpicerie :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerEpicerie forme zoneId entree capacite = Epicerie forme zoneId entree capacite [] (StockProduit [])
+
+creerCommissariat :: Forme -> ZonId -> Coord -> Batiment
+creerCommissariat = Commissariat
+
+creerEcole :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerEcole forme zoneId entree capacite = Ecole forme zoneId entree capacite []
+
+creerHopital :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerHopital forme zoneId entree capacite = Hopital forme zoneId entree capacite []
+
+creerCinema :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerCinema forme zoneId entree capacite = Cinema forme zoneId entree capacite []
+
+creerRestaurant :: Forme -> ZonId -> Coord -> Int -> Batiment
+creerRestaurant forme zoneId entree capacite = Restaurant forme zoneId entree capacite []
+
+creerBanque :: BankId -> Forme -> ZonId -> Coord -> Float -> Batiment
+creerBanque idBanque forme zoneId entree argent = Banque idBanque forme zoneId entree argent []
+
+creerPrefecture :: Prefecture -> Forme -> ZonId -> Coord -> Batiment
+creerPrefecture = Pref
 
 
 -- -- des exemples
@@ -156,14 +203,14 @@ retirerCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId 
 
 
 virementBancaire :: Batiment -> Float -> Batiment->Citoyen-> Citoyen-> (Batiment,Batiment, Citoyen, Citoyen)
-virementBancaire b1 montant b2 emetteur recepteur = 
-                  let b1'= getFstMaybe(virementBanqueVersBanque b1 montant b2) in
-                  let b2' = getSndMaybe(virementBanqueVersBanque b1 montant b2) in
-                  let emetteur' = getFstMaybe(virementCitoyenVersCitoyen emetteur montant recepteur) in
-                  let recepteur' = getSndMaybe(virementCitoyenVersCitoyen emetteur montant recepteur) in
+virementBancaire b1 montant b2 emetteur recepteur =
+                  let b1'= getFstMaybe (virementBanqueVersBanque b1 montant b2) in
+                  let b2' = getSndMaybe (virementBanqueVersBanque b1 montant b2) in
+                  let emetteur' = getFstMaybe (virementCitoyenVersCitoyen emetteur montant recepteur) in
+                  let recepteur' = getSndMaybe (virementCitoyenVersCitoyen emetteur montant recepteur) in
                    if b1 == b2 then (b1,b1,emetteur',recepteur') -- si je suis dans la même banque je ne change rien dans le montant de la banque, je change juste le montant des des deux comptes
                    else  (b1', b2', emetteur', recepteur')
-                  
+
 
 
 virementBanqueVersBanque :: Batiment -> Float -> Batiment -> Maybe (Batiment, Batiment)
@@ -172,10 +219,10 @@ virementBanqueVersBanque (Banque id forme zoneId entree argent clients) montant 
         else Just (Banque id forme zoneId entree (argent - montant) clients, Banque id' forme' zoneId' entree' (argent' + montant) clients')
 
 virementCitoyenVersCitoyen :: Citoyen -> Float -> Citoyen-> Maybe (Citoyen,Citoyen)
-virementCitoyenVersCitoyen (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) 
-                    montant 
-                  (Habitant (Personne id' c' o' cri' nat' m') (Vie argent' sante' nivFaim' nivFatigue') vp') = 
-                    if argent < montant then Nothing 
+virementCitoyenVersCitoyen (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp)
+                    montant
+                  (Habitant (Personne id' c' o' cri' nat' m') (Vie argent' sante' nivFaim' nivFatigue') vp') =
+                    if argent < montant then Nothing
                      else Just (Habitant (Personne id c o cri nat m) (Vie (argent - montant) sante nivFaim nivFatigue) vp, Habitant (Personne id' c' o' cri' nat' m') (Vie (argent' + montant) sante' nivFaim' nivFatigue') vp')
 
 -- recuperer les valeurs du maybe
@@ -227,7 +274,7 @@ bob = Habitant p2 v2 vp2
 
 
 invariantBatiment :: Batiment -> Bool
-invariantBatiment b = condBatiment b && capacitePositive b 
+invariantBatiment b = condBatiment b && capacitePositive b
 
 
 condBatiment :: Batiment -> Bool
@@ -259,21 +306,21 @@ getCapacite (Ecole _ _ _ capacite _) = capacite
 getCapacite (Hopital _ _ _ capacite _) = capacite
 
 ajouterPatient :: Batiment -> CitId -> Batiment
-ajouterPatient (Hopital f zid e capacite patients) citId = 
+ajouterPatient (Hopital f zid e capacite patients) citId =
                     let size = length patients in
                     if size < capacite then
-                      if citId `elem` patients then 
+                      if citId `elem` patients then
                             error "le citoyen est déjà hospitalisé"
-                      else  
+                      else
                             Hopital f zid e capacite (citId:patients)
                     else error "le batiment est plein"
 
 hospitaliser :: Citoyen -> Batiment -> Batiment
-hospitaliser (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) bat = 
-              case bat of 
+hospitaliser (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) bat =
+              case bat of
                 Hopital f zid e capacite patients ->
                             ajouterPatient (Hopital f zid e capacite patients) id
-                _ -> error "ce n'est pas un hopital" 
+                _ -> error "ce n'est pas un hopital"
 
 sortirPatientDeL'Hopital :: CitId -> Batiment -> Batiment
 sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) =
@@ -283,14 +330,14 @@ sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) =
 
 
 -- vente de produit
-vendreProduit :: Batiment -> Produit -> (Batiment,Produit) 
-vendreProduit (Epicerie f zid e capacite clients stock) produit = 
+vendreProduit :: Batiment -> Produit -> (Batiment,Produit)
+vendreProduit (Epicerie f zid e capacite clients stock) produit =
               let (foundProduct,foundQuantity) = getProduitQuantite stock produit in
              if foundQuantity == Quantite 0 then error "This product is out of stock"
-             else 
-                if foundQuantity >= Quantite 1 then 
+             else
+                if foundQuantity >= Quantite 1 then
                     (Epicerie f zid e capacite clients (removeProduct stock produit), foundProduct)
-                else 
+                else
                     error "Valeur Negative"
 
 
@@ -315,7 +362,7 @@ vp = ViePersonnelle {
   maison = BatId 1,
   travail = Just (BatId 2),
   courses = Just (BatId 3)
-} 
+}
 
 citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
@@ -349,7 +396,7 @@ res = vendreProduit epicerie Batiment.produit
 -- >>> show res
 -- "(Epicerie Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 clients et StockProduit [(Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 0.5, typeProd = Alimentaire Pain Frais, production = Local},Quantite 0)] stock,Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 0.5, typeProd = Alimentaire Pain Frais, production = Local})"
 
-(b,_)=res 
+(b,_)=res
 
 res' = vendreProduit b Batiment.produit
 -- >>> show res'
