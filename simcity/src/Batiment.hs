@@ -283,7 +283,7 @@ sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) = Hopital f z
 vendreProduit :: Batiment -> Produit -> (Batiment,Produit) 
 vendreProduit (Epicerie f zid e capacite clients stock) produit = 
               let (foundProduct,foundQuantity) = getProduitQuantite stock produit in
-             if foundQuantity == Quantite 0 then error "le produit n'est pas disponible"
+             if foundQuantity == Quantite 0 then error "This product is out of stock"
              else 
                 if foundQuantity >= Quantite 1 then 
                     (Epicerie f zid e capacite clients (removeProduct stock produit), foundProduct)
@@ -332,3 +332,16 @@ citoyen = Habitant Citoyen.personne Citoyen.v Citoyen.vp
 
 -- ! test des produits
 
+produit = Produit (ProdId 1) "Pain" 0.5 (Alimentaire Pain Frais) Local
+
+epicerie = Epicerie (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 [] (StockProduit [(Batiment.produit, Quantite 1)])
+
+res = vendreProduit epicerie Batiment.produit
+-- >>> show res
+-- "(Epicerie Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 clients et StockProduit [(Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 0.5, typeProd = Alimentaire Pain Frais, production = Local},Quantite 0)] stock,Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 0.5, typeProd = Alimentaire Pain Frais, production = Local})"
+
+(b,_)=res 
+
+res' = vendreProduit b Batiment.produit
+-- >>> show res'
+-- This product is out of stock
