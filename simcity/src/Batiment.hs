@@ -31,7 +31,8 @@ data Batiment = Cabane {
               | Commissariat {
                     forme :: Forme,
                     zoneId :: ZonId,
-                    entree :: Coord
+                    entree :: Coord,
+                    heliport :: Bool
                 }
               | Ecole {
                     forme :: Forme,
@@ -45,7 +46,8 @@ data Batiment = Cabane {
                     zoneId :: ZonId,
                     entree :: Coord,
                     capacite :: Int,  -- Capacité maximale de patients que cet hôpital peut contenir
-                    patients :: [CitId]  -- Liste des citoyens patients de cet hôpital
+                    patients :: [CitId],  -- Liste des citoyens patients de cet hôpital,
+                    heliport :: Bool
                 }
               | Cinema {
                     forme :: Forme,
@@ -82,6 +84,15 @@ data Batiment = Cabane {
                     capacite :: Int,  -- Capacité maximale de citoyens que cette maison peut contenir
                     habitants :: [CitId]  -- Liste des citoyens habitant cette maison
                 }
+              | CasernePompier {
+                    forme :: Forme,
+                    zoneId :: ZonId,
+                    entree :: Coord,
+                    pompiers :: Int, -- nombre de pompiers
+                    camions :: Int, -- nombre de camions
+                    heliport :: Bool
+
+                }
 
                 deriving(Eq)
 
@@ -92,15 +103,15 @@ instance Show Batiment where
     show (Cabane forme zoneId _ capacite habitants) = "Cabane " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length habitants) ++ " habitants"
     show (Atelier forme zoneId _ capacite employes) = "Atelier " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length employes) ++ " employés"
     show (Epicerie forme zoneId _ capacite clients  s) = "Epicerie " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length clients) ++ " clients" ++  " et " ++ show s ++ " stock"
-    show (Commissariat forme zoneId _) = "Commissariat " ++ show forme ++ " dans la zone " ++ show zoneId
+    show (Commissariat forme zoneId _ h) = "Commissariat " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec un heliport " ++ show h
     show (Ecole forme zoneId _ capacite eleves) = "Ecole " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length eleves) ++ " élèves"
-    show (Hopital forme zoneId _ capacite patients) = "Hopital " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length patients) ++ " patients"
+    show (Hopital forme zoneId _ capacite patients h) = "Hopital " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length patients) ++ " patients" ++ " et un heliport " ++ show h
     show (Cinema forme zoneId _ capacite spectateurs) = "Cinema " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length spectateurs) ++ " spectateurs"
     show (Restaurant forme zoneId _ capacite clients) = "Restaurant " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length clients) ++ " clients"
     show (Banque idBanque forme zoneId _ argent clients) = "Banque " ++ show idBanque ++ " " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec un argent de " ++ show argent ++ " et " ++ show (length clients) ++ " clients"
     show (Pref pref forme zoneId _) = "Prefecture " ++ show pref ++ " " ++ show forme ++ " dans la zone " ++ show zoneId
     show (Maison forme zoneId _ capacite habitants) = "Maison " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec une capacité de " ++ show capacite ++ " et " ++ show (length habitants) ++ " habitants"
-
+    show (CasernePompier forme zoneId _ pompiers camions heliport) = "Caserne de Pompier " ++ show forme ++ " dans la zone " ++ show zoneId ++ " avec " ++ show pompiers ++ " pompiers et " ++ show camions ++ " camions et un heliport " ++ show heliport
 -- fonctions pour gérer notre batiment
 -- on a supposé que les seul modifications possibles sont les cas dessus car c'est plutot pas trop réel de changer le type d'un batiment ou son entrée
 -- voir qu'il y a des cas dans la vraie vie où on peut changer le type d'un batiment mais ce n'est pas un généralité
@@ -108,11 +119,12 @@ ajouterCapacite :: Batiment -> Int -> Batiment
 ajouterCapacite (Cabane forme zoneId entree capacite habitants) n = Cabane forme zoneId entree (capacite + n) habitants
 ajouterCapacite (Atelier forme zoneId entree capacite employes) n = Atelier forme zoneId entree (capacite + n) employes
 ajouterCapacite (Epicerie forme zoneId entree capacite clients  s) n = Epicerie forme zoneId entree (capacite + n) clients  s
-ajouterCapacite (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
+ajouterCapacite (Commissariat forme zoneId entree h) _ = Commissariat forme zoneId entree h
 ajouterCapacite (Ecole forme zoneId entree capacite eleves) n = Ecole forme zoneId entree (capacite + n) eleves
-ajouterCapacite (Hopital forme zoneId entree capacite patients) n = Hopital forme zoneId entree (capacite + n) patients
+ajouterCapacite (Hopital forme zoneId entree capacite patients h) n = Hopital forme zoneId entree (capacite + n) patients h
 ajouterCapacite (Cinema forme zoneId entree capacite spectateurs) n = Cinema forme zoneId entree (capacite + n) spectateurs
 ajouterCapacite (Restaurant forme zoneId entree capacite clients) n = Restaurant forme zoneId entree (capacite + n) clients
+
 
 
 diminuerCapacite :: Batiment -> Int -> Batiment
@@ -120,9 +132,9 @@ diminuerCapacite (Cabane forme zoneId entree capacite habitants) n = Cabane form
   --                                                                                        le max c'est juste pour ne pas avoir des valeurs négatives
 diminuerCapacite (Atelier forme zoneId entree capacite employes) n = Atelier forme zoneId entree (max (capacite - n) 0) employes
 diminuerCapacite (Epicerie forme zoneId entree capacite clients  s) n = Epicerie forme zoneId entree (max (capacite - n) 0) clients  s
-diminuerCapacite (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
+diminuerCapacite (Commissariat forme zoneId entree h) _ = Commissariat forme zoneId entree h
 diminuerCapacite (Ecole forme zoneId entree capacite eleves) n = Ecole forme zoneId entree (max (capacite - n) 0) eleves
-diminuerCapacite (Hopital forme zoneId entree capacite patients) n = Hopital forme zoneId entree (max (capacite - n) 0) patients
+diminuerCapacite (Hopital forme zoneId entree capacite patients h) n = Hopital forme zoneId entree (max (capacite - n) 0) patients h
 diminuerCapacite (Cinema forme zoneId entree capacite spectateurs) n = Cinema forme zoneId entree (max (capacite - n) 0) spectateurs
 diminuerCapacite (Restaurant forme zoneId entree capacite clients) n = Restaurant forme zoneId entree (max (capacite - n) 0) clients
 
@@ -130,7 +142,7 @@ ajouterCitoyen :: Batiment -> CitId -> Batiment
 ajouterCitoyen (Cabane forme zoneId entree capacite habitants) citId = Cabane forme zoneId entree capacite (citId:habitants)
 ajouterCitoyen (Atelier forme zoneId entree capacite employes) citId = Atelier forme zoneId entree capacite (citId:employes)
 ajouterCitoyen (Epicerie forme zoneId entree capacite clients  s) citId = Epicerie forme zoneId entree capacite (citId:clients)  s
-ajouterCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
+ajouterCitoyen (Commissariat forme zoneId entree h) _ = Commissariat forme zoneId entree h
 ajouterCitoyen (Ecole forme zoneId entree capacite eleves) citId = Ecole forme zoneId entree capacite (citId:eleves)
 ajouterCitoyen (Maison forme zoneId entree capacite habitants) citId = Maison forme zoneId entree capacite (citId:habitants)
 -- NB : pour l'hopital, on a une fonction spécifique pour ajouter un patient (voir cf . hospitaliser)
@@ -139,7 +151,7 @@ retirerCitoyen :: Batiment -> CitId -> Batiment
 retirerCitoyen (Cabane forme zoneId entree capacite habitants) citId = Cabane forme zoneId entree capacite (filter (/= citId) habitants)
 retirerCitoyen (Atelier forme zoneId entree capacite employes) citId = Atelier forme zoneId entree capacite (filter (/= citId) employes)
 retirerCitoyen (Epicerie forme zoneId entree capacite clients  s) citId = Epicerie forme zoneId entree capacite (filter (/= citId) clients)  s
-retirerCitoyen (Commissariat forme zoneId entree) _ = Commissariat forme zoneId entree
+retirerCitoyen (Commissariat forme zoneId entree h) _ = Commissariat forme zoneId entree h
 retirerCitoyen (Ecole forme zoneId entree capacite eleves) citId = Ecole forme zoneId entree capacite (filter (/= citId) eleves)
 retirerCitoyen (Maison forme zoneId entree capacite habitants) citId = Maison forme zoneId entree capacite (filter (/= citId) habitants)
 
@@ -157,13 +169,13 @@ creerEpicerie :: Forme -> ZonId -> Coord -> Int -> Batiment
 creerEpicerie forme zoneId entree capacite = Epicerie forme zoneId entree capacite [] (StockProduit [])
 
 creerCommissariat :: Forme -> ZonId -> Coord -> Batiment
-creerCommissariat = Commissariat
+creerCommissariat forme zoneId entree = Commissariat forme zoneId entree True
 
 creerEcole :: Forme -> ZonId -> Coord -> Int -> Batiment
 creerEcole forme zoneId entree capacite = Ecole forme zoneId entree capacite []
 
 creerHopital :: Forme -> ZonId -> Coord -> Int -> Batiment
-creerHopital forme zoneId entree capacite = Hopital forme zoneId entree capacite []
+creerHopital forme zoneId entree capacite = Hopital forme zoneId entree capacite [] True
 
 creerCinema :: Forme -> ZonId -> Coord -> Int -> Batiment
 creerCinema forme zoneId entree capacite = Cinema forme zoneId entree capacite []
@@ -176,6 +188,20 @@ creerBanque idBanque forme zoneId entree argent = Banque idBanque forme zoneId e
 
 creerPrefecture :: Prefecture -> Forme -> ZonId -> Coord -> Batiment
 creerPrefecture = Pref
+
+-- gérer les pompiers 
+
+ajouterNombrePompier :: Batiment -> Int -> Batiment
+ajouterNombrePompier (CasernePompier forme zoneId entree pompiers camions heliport) n = CasernePompier forme zoneId entree (pompiers + n) camions heliport
+
+ajouterNombreCamion :: Batiment -> Int -> Batiment
+ajouterNombreCamion (CasernePompier forme zoneId entree pompiers camions heliport) n = CasernePompier forme zoneId entree pompiers (camions + n) heliport
+
+diminuerNombrePompier :: Batiment -> Int -> Batiment
+diminuerNombrePompier (CasernePompier forme zoneId entree pompiers camions heliport) n = CasernePompier forme zoneId entree (max (pompiers - n) 0) camions heliport
+
+diminuerNombreCamion :: Batiment -> Int -> Batiment
+diminuerNombreCamion (CasernePompier forme zoneId entree pompiers camions heliport) n = CasernePompier forme zoneId entree pompiers (max (camions - n) 0) heliport
 
 
 
@@ -285,7 +311,7 @@ condBatiment (Cabane _ _ _ capacite habitants) = length habitants <= capacite
 condBatiment (Atelier _ _ _ capacite employes) = length employes <= capacite
 condBatiment (Epicerie _ _ _ capacite clients  _) = length clients <= capacite
 condBatiment (Ecole _ _ _ capacite eleves) = length eleves <= capacite
-condBatiment (Hopital _ _ _ capacite patients) = length patients <= capacite
+condBatiment (Hopital _ _ _ capacite patients _) = length patients <= capacite
 condBatiment (Cinema _ _ _ capacite spectateurs) = length spectateurs <= capacite
 condBatiment (Restaurant _ _ _ capacite clients) = length clients <= capacite
 condBatiment _ = error "ce batiment n'a pas de capacité"
@@ -296,7 +322,7 @@ capacitePositive (Cabane _ _ _ capacite _) = capacite > 0 ||  capacite /= maxBou
 capacitePositive (Atelier _ _ _ capacite _) = capacite > 0   ||  capacite /= maxBound
 capacitePositive (Epicerie _ _ _ capacite _  _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Ecole _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
-capacitePositive (Hopital _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
+capacitePositive (Hopital _ _ _ capacite _ _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Cinema _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive (Restaurant _ _ _ capacite _) = capacite > 0  ||  capacite /= maxBound
 capacitePositive _ = error "ce batiment n'a pas de capacité"
@@ -306,29 +332,29 @@ getCapacite (Cabane _ _ _ capacite _) = capacite
 getCapacite (Atelier _ _ _ capacite _) = capacite
 getCapacite (Epicerie _ _ _ capacite _ _) = capacite
 getCapacite (Ecole _ _ _ capacite _) = capacite
-getCapacite (Hopital _ _ _ capacite _) = capacite
+getCapacite (Hopital _ _ _ capacite _ _) = capacite
 
 ajouterPatient :: Batiment -> CitId -> Batiment
-ajouterPatient (Hopital f zid e capacite patients) citId =
+ajouterPatient (Hopital f zid e capacite patients h) citId =
                     let size = length patients in
                     if size < capacite then
                       if citId `elem` patients then
                             error "le citoyen est déjà hospitalisé"
                       else
-                            Hopital f zid e capacite (citId:patients)
+                            Hopital f zid e capacite (citId:patients) h
                     else error "le batiment est plein"
 
 hospitaliser :: Citoyen -> Batiment -> Batiment
 hospitaliser (Habitant (Personne id c o cri nat m) (Vie argent sante nivFaim nivFatigue) vp) bat =
               case bat of
-                Hopital f zid e capacite patients ->
-                            ajouterPatient (Hopital f zid e capacite patients) id
+                Hopital f zid e capacite patients h ->
+                            ajouterPatient (Hopital f zid e capacite patients h) id
                 _ -> error "ce n'est pas un hopital"
 
 sortirPatientDeL'Hopital :: CitId -> Batiment -> Batiment
-sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients) =
+sortirPatientDeL'Hopital citId (Hopital f zid e capacite patients h) =
           if citId `elem` patients then
-           Hopital f zid e capacite (filter (/= citId) patients)
+           Hopital f zid e capacite (filter (/= citId) patients) h
            else error "le citoyen n'est pas hospitalisé dans cette hopital"
 
 

@@ -9,6 +9,7 @@ newtype CitId = CitId Int  deriving (Show,Eq, Ord)
 newtype PrefId = PrefId Int  deriving (Show,Eq, Ord)
 newtype BankId = BankId Int  deriving (Show,Eq, Ord)
 newtype ProdId = ProdId Int  deriving (Show,Eq, Ord)
+newtype VehicId = VehicId Int  deriving (Show,Eq, Ord)
 
 
 -- nationalité
