@@ -96,3 +96,6 @@ nvehiEntre' = achatVehicule vehiEntre (VehiculeEntreprise (EntrepriseId 2))
 
 -- >>> nvehiEntre'
 -- Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = "12534", propriataire = Just (VehiculeEntreprise (EntrepriseId 2)), passagers = [], prixVehic = 1000.0}
+
+
+-- ! rouler une voiture

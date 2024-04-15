@@ -5,6 +5,7 @@ import Citoyen
 import Prefecture
 import Occupation -- can be deleted
 import Produit
+import Vehicule
 data Batiment = Cabane {
                     forme :: Forme,
                     zoneId :: ZonId,

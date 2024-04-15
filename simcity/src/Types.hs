@@ -53,12 +53,25 @@ data ViePersonnelle = ViePersonnelle {
 }deriving (Show,Eq)
 data Entreprise = Entreprise {
     idEntreprise :: EntrepriseId,
-    coordEntreprise :: Coord,
     batiments :: [BatId],
-    employes :: [CitId],
+    employes :: [(CitId,Poste)],
     capital :: Float
 } deriving (Show,Eq)
 
+data Poste = 
+            CEO 
+            | CTO 
+            | ProductManager 
+            | Developer
+            | Designer
+            | HR
+            | Accountant
+            | Sales
+            | Marketing
+            | Security
+            | Cleaning
+            | Driver
+            deriving (Show,Eq)
 
 data PropritaireVehicule =    VehiculeEntreprise EntrepriseId
                             | VehiculeCitoyen CitId

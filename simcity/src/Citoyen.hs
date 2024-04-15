@@ -4,7 +4,7 @@ import Occupation
 import Types
 import Maladies
 import Produit
-
+import Vehicule 
 data Citoyen =    Immigrant   Personne Vie
                 | Habitant    Personne  Vie ViePersonnelle
                 | Emigrant    Personne
@@ -402,3 +402,5 @@ produit = Produit {
 
 -- >>> show $ guerirD'uneMaladie citoyen maladie
 -- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 50, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
+
+
