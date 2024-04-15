@@ -17,5 +17,5 @@ data TypeVehicule = Voiture
                     | Helicoptere
                      deriving (Show, Eq)
 
-
+    
 -- acheterVehicule :: Vehicule ->
