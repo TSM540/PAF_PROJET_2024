@@ -11,7 +11,8 @@ newtype BankId = BankId Int  deriving (Show,Eq, Ord)
 newtype ProdId = ProdId Int  deriving (Show,Eq, Ord)
 newtype VehicId = VehicId Int  deriving (Show,Eq, Ord)
 newtype EntrepriseId = EntrepriseId Int  deriving (Show,Eq, Ord)
-
+newtype Capacite = Capacite Int deriving (Show, Eq)
+newtype ParkingId = ParkingId Int deriving (Show, Eq, Ord)
 
 -- nationalité
 data Nationalite = Francais 
@@ -74,7 +75,12 @@ data Poste =
             | Cleaning
             | Driver
             deriving (Show,Eq)
+-- Parking
 
+data Parking = 
+                ParkingMaison  Capacite [VehicId] ParkingId
+              | ParkingImmeuble  Capacite [VehicId] ParkingId
+                deriving (Eq)
 data PropritaireVehicule =    VehiculeEntreprise EntrepriseId
                             | VehiculeCitoyen CitId
                             deriving (Show,Eq)
