@@ -21,11 +21,11 @@ immigrantToHabitant :: Citoyen -> ViePersonnelle -> Maybe Citoyen
 immigrantToHabitant c vp= case c of
                         Immigrant p v ->  case vp of
                                 -- dans le cas où la travail est nothing (voir Types.hs ViePersonnelle)
-                                ViePersonnelle _ Nothing _ -> Nothing
+                                ViePersonnelle _ Nothing _ _ -> Nothing
                                   -- dans le cas où les courses est nothing (voir Types.hs ViePersonnelle)
-                                ViePersonnelle _ _ Nothing -> Nothing
+                                ViePersonnelle _ _ Nothing _ -> Nothing
                                 -- le cas où tout est bien
-                                ViePersonnelle _ (Just _) (Just _) -> Just (Habitant p v vp)
+                                ViePersonnelle _ (Just _) (Just _) _ -> Just (Habitant p v vp)
                         _ ->  Nothing
 maybeValue :: Maybe a -> a
 maybeValue (Just a) = a -- note that Just a is wrapped
@@ -189,7 +189,8 @@ citoyenValide = Habitant Personne
    ViePersonnelle
       { maison = BatId 1
       , travail = Just (BatId 2)
-      , courses = Just (BatId 3)
+      , courses = Just (BatId 3),
+      vehicules = []
       }
 
 
@@ -212,7 +213,8 @@ citoyenSanteNegative = Habitant
    ViePersonnelle
       { maison = BatId 1
       , travail = Just (BatId 2)
-      , courses = Just (BatId 3)
+      , courses = Just (BatId 3),
+      vehicules = []
       }
 
 
@@ -246,7 +248,8 @@ habitantFatigueTravail = Habitant
   ViePersonnelle
       { maison = BatId 1
       , travail = Just (BatId 2)
-      , courses = Just (BatId 3)
+      , courses = Just (BatId 3),
+        vehicules = []
       }
 
 -- Coordonnées de la maison
@@ -277,7 +280,8 @@ habitantFatigue = Habitant
   ViePersonnelle
       { maison = BatId 1
       , travail = Just (BatId 2)
-      , courses = Just (BatId 3)
+      , courses = Just (BatId 3),
+      vehicules = []
       }
 
 
@@ -357,7 +361,8 @@ v = Vie {
 vp = ViePersonnelle {
   maison = BatId 1,
   travail = Just (BatId 2),
-  courses = Just (BatId 3)
+  courses = Just (BatId 3),
+  vehicules = []
 } 
 
 citoyen = Habitant personne v vp
@@ -404,3 +409,35 @@ produit = Produit {
 -- "Habitant : Personne {idCit = CitId 1, coord = C {cx = 0, cy = 0}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 1000.0, sante = 100, niveauFaim = 50, niveauFatigue = 50}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3)}"
 
 
+-- acheterVehicule :: Citoyen -> Vehicule -> Citoyen-> Citoyen
+-- acheterVehicule (Habitant (Personne id c o cri nat m) v@(Vie argent sante nivFaim nivFatigue) vp) 
+--             vehicule@(Vehicule idv typev imm prop pass prix) = 
+--                let nv = achatVehicule vehicule (VehiculeCitoyen id) in
+--                 if (argent - prix < 0) then error "Vous n'avez pas assez d'argent pour" 
+--                 Habitant (Personne id c o cri nat m) (Vie (argent - prix) sante nivFaim nivFatigue) (vp {vehicules = idv : vehicules vp})
+               
+acheterVehiculeParCitoyen :: Citoyen -> Vehicule -> (Citoyen, Vehicule)
+acheterVehiculeParCitoyen (Habitant (Personne id c o cri nat m) v@(Vie argent sante nivFaim nivFatigue) vp) 
+            vehicule@(Vehicule idv typev imm prop pass prix cap) = 
+               let nv = achatVehicule vehicule (VehiculeCitoyen id) in
+                if argent - prix < 0 then error "Le citoyen n'a pas assez d'argent pour acheter ce véhicule"
+                else ( 
+                      Habitant (Personne id c o cri nat m) 
+                      (Vie (argent - prix) sante nivFaim nivFatigue) 
+                      (vp {vehicules = idv : vehicules vp}) 
+                    ,
+                    nv{passagers= []}
+                )
+
+
+-- >>> acheterVehiculeParCitoyen citoyen vehic1
+-- Ce vehicule appartient a une entreprise
+
+-- >>> acheterVehiculeParCitoyen citoyen vehic2
+-- Ce citoyen est deja proprietaire de ce vehicule
+
+-- >>> acheterVehiculeParCitoyen citoyen vehic3
+-- Ce vehicule appartient a une entreprise
+
+-- >>> show $ snd (acheterVehiculeParCitoyen citoyen vehic4)
+-- "Vehicule {idVehic = VehicId 4, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeCitoyen (CitId 1)), passagers = [], prixVehic = 1000.0}"

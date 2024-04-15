@@ -49,13 +49,15 @@ data Vie = Vie {
 data ViePersonnelle = ViePersonnelle {
            maison :: BatId,
            travail :: Maybe BatId,
-           courses :: Maybe BatId
+           courses :: Maybe BatId,
+           vehicules :: [VehicId]
 }deriving (Show,Eq)
 data Entreprise = Entreprise {
     idEntreprise :: EntrepriseId,
     batiments :: [BatId],
     employes :: [(CitId,Poste)],
-    capital :: Float
+    capital :: Float,
+    vehiculesService :: [VehicId]
 } deriving (Show,Eq)
 
 data Poste = 
