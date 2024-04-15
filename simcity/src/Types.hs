@@ -10,6 +10,7 @@ newtype PrefId = PrefId Int  deriving (Show,Eq, Ord)
 newtype BankId = BankId Int  deriving (Show,Eq, Ord)
 newtype ProdId = ProdId Int  deriving (Show,Eq, Ord)
 newtype VehicId = VehicId Int  deriving (Show,Eq, Ord)
+newtype EntrepriseId = EntrepriseId Int  deriving (Show,Eq, Ord)
 
 
 -- nationalité
@@ -50,4 +51,25 @@ data ViePersonnelle = ViePersonnelle {
            travail :: Maybe BatId,
            courses :: Maybe BatId
 }deriving (Show,Eq)
+data Entreprise = Entreprise {
+    idEntreprise :: EntrepriseId,
+    coordEntreprise :: Coord,
+    batiments :: [BatId],
+    employes :: [CitId],
+    capital :: Float
+} deriving (Show,Eq)
+
+
+data PropritaireVehicule =    VehiculeEntreprise EntrepriseId
+                            | VehiculeCitoyen CitId
+                            deriving (Show,Eq)
+
+getEntrepriseId :: PropritaireVehicule -> EntrepriseId
+getEntrepriseId (VehiculeEntreprise eid) = eid
+getEntrepriseId (VehiculeCitoyen _) = error "Ce vehicule appartient a une entreprise"
+
+getCitoyenId :: PropritaireVehicule -> CitId
+getCitoyenId (VehiculeCitoyen cid) = cid
+getCitoyenId (VehiculeEntreprise _) = error "Ce vehicule appartient a un citoyen"
+
 
