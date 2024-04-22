@@ -37,69 +37,41 @@ citoyensToString [] = ""
 citoyensToString ((citId, citoyen):rest) =
     "    " ++ show citId ++ ": " ++ show citoyen ++ "\n" ++ citoyensToString rest
 
--- -- Création de quelques zones
--- zone1 = Eau (Rectangle (C 0 0) 10 5)
--- zone2 = Route (Rectangle (C 10 0) 5 10)
--- zone3 = ZoneResidentielle (Rectangle (C 0 5) 10 10) []
--- zone4 = ZoneIndustrielle (Rectangle (C 10 10) 10 5) []
--- zone5 = ZoneCommerciale (Rectangle (C 0 15) 5 10) []
 
--- Création de quelques citoyens
--- citoyen1 = Immigrant (C 1 1) (1, 1, 1) Travailler
--- citoyen2 = Habitant (C 3 3) (2, 2, 2) (BatId 1, Nothing, Nothing) Dormir
--- citoyen3 = Emigrant (C 5 5) FaireCourses
-
--- -- Création de la ville
--- maVille = Ville {
---     villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2), (ZonId 3, zone3), (ZonId 4, zone4), (ZonId 5, zone5)],
---     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
--- }
--- >>> print maVille
-
--- >>> :t maVille
--- maVille :: Ville
 -- invariant 
 invariantVille :: Ville -> Bool
 invariantVille  v=
-            invariantZonesDisjointes v &&
+            invariantZonesDisjointes v
+             &&
             villeVerifiantAdjacenceARoute v
-            && routesConnexes v
-            && invariantBatiments v
+            && 
+            routesConnexes v
+            && 
+            invariantBatiments v
 
 --  toutes les zones soit disjointes deux `a deux
 -- on écrit une fonction zonesDisjointes de Zone -> Zone -> Bool pour vérifier que deux zones sont disjointes 
 -- on rappele que deux zones sont disjointes si elles n'ont pas de collision
 --et puis  on utilise cette  fonction(zonesDisjointes) et on map sur toutes les zones de la ville pour vérifier que toutes les zones sont disjointes deux à deux 
 
+
 invariantZonesDisjointes :: Ville -> Bool
 invariantZonesDisjointes ville =
-    all (\(zonId1, zone1) -> all (\(zonId2, zone2) -> zonId1 == zonId2 || zonesDisjointes zone1 zone2) (Map.toList (villeZones ville))) (Map.toList (villeZones ville))
+    all (\(zonId1, zone1) -> all (\(zonId2, zone2) -> zonId1 == zonId2 
+    || zonesDisjointes zone1 zone2) (Map.toList (villeZones ville))) (Map.toList (villeZones ville))
 
--- zoneA = Eau (Rectangle (C 0 0) 1 1)
--- zoneB = Route (Rectangle (C 2 2) 1 1)
--- zoneC = ZoneResidentielle (Rectangle (C 4 4) 1 1) []
--- zoneD = ZoneIndustrielle (Rectangle (C 6 6) 1 1) []
--- zoneE = ZoneCommerciale (Rectangle (C 8 8) 1 1) []
-
-
-
--- -- Création de la ville
--- maVille2 = Ville {
---     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD), (ZonId 5, zoneE)],
---     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
--- }
-
--- >>> invariantZonesDisjointes maVille
--- False
--- >>> invariantZonesDisjointes maVille2
--- True
 
 -- Fonction pour vérifier si une zone est adjacente à au moins une zone de route
+-- estAdjacenteARoute :: Zone -> Ville -> Bool
+-- estAdjacenteARoute zone ville =
+--     any (\(_, z) -> case z of
+--                       Route _ -> True
+--                       _       -> False) (Map.toList (villeZones ville))
 estAdjacenteARoute :: Zone -> Ville -> Bool
-estAdjacenteARoute zone ville =
-    any (\(_, z) -> case z of
-                      Route _ -> True
-                      _       -> False) (Map.toList (villeZones ville))
+estAdjacenteARoute z ville = any (\z' -> case z' of 
+        Route _ -> adjacentes (zoneForme z) (zoneForme z'); 
+        _ -> False) (Map.elems (villeZones ville))
+
 
 -- Fonction pour vérifier si toutes les zones vérifient l'adjacence à une zone de route
 villeVerifiantAdjacenceARoute :: Ville -> Bool
@@ -108,31 +80,7 @@ villeVerifiantAdjacenceARoute ville =
                       Route _ -> True -- Les zones de route sont toujours adjacentes à une zone de route
                       _       -> estAdjacenteARoute z ville) (Map.toList (villeZones ville))
 
--- -- Création de zones pour la première ville
--- zoneA = Eau (Rectangle (C 0 0) 1 1)
--- zoneB = Route (Rectangle (C 2 0) 1 1)
--- zoneC = ZoneResidentielle (Rectangle (C 4 0) 1 1) []
--- zoneD = ZoneIndustrielle (Rectangle (C 0 2) 1 1) []
--- zoneE = ZoneCommerciale (Rectangle (C 0 4) 1 1) []
 
--- -- Création de la première ville
--- ville1 = Ville {
---     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD), (ZonId 5, zoneE)],
---     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
--- }
-
-
--- zoneA = Eau (Rectangle (C 0 0) 1 1)
--- zoneB = Route (Rectangle (C 2 0) 1 1)
--- zoneC = ZoneResidentielle (Rectangle (C 4 0) 1 1) []
--- zoneD = ZoneIndustrielle (Rectangle (C 0 2) 1 1) []
--- zoneE = ZoneCommerciale (Rectangle (C 0 4) 1 1) []
-
--- -- Création de la première ville
--- villeExemple = Ville {
---     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD), (ZonId 5, zoneE)],
---     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
--- }
 -- Vérifie si une liste de zones est une séquence de zones de route connexes
 estRouteConnexe :: [Zone] -> Ville -> Bool
 estRouteConnexe [] _ = True
@@ -146,23 +94,6 @@ routesConnexes ville =
         listZonesRoute = Map.elems zonesRoute
     in
         estRouteConnexe listZonesRoute ville
-
--- -- Création de zones pour la ville
--- zoneA = Eau (Rectangle (C 0 0) 1 1)
--- zoneB = Route (Rectangle (C 2 0) 1 1)
--- zoneC = Route (Rectangle (C 4 0) 1 1)
--- zoneD = Route (Rectangle (C 6 0) 1 1)
--- zoneE = Eau (Rectangle (C 0 2) 1 1)
--- zoneF = Route (Rectangle (C 2 2) 1 1)
--- zoneG = Eau (Rectangle (C 4 2) 1 1)
--- zoneH = Route (Rectangle (C 6 2) 1 1)
-
--- -- Création de la ville
--- v = Ville {
---     villeZones = Map.fromList [(ZonId 1, zoneA), (ZonId 2, zoneB), (ZonId 3, zoneC), (ZonId 4, zoneD),
---                                (ZonId 5, zoneE), (ZonId 6, zoneF), (ZonId 7, zoneG), (ZonId 8, zoneH)],
---     villeCitoyens = Map.empty
--- }
 
 
 -- construire une zone dans une ville 
@@ -221,30 +152,6 @@ construireBatiment batiment zone zonId ville =
 remplacerZone :: ZonId -> Zone -> Map ZonId Zone -> Map ZonId Zone
 remplacerZone = Map.insert
 
--- ville = Ville {
---   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
---   villeCitoyens = Map.empty
--- }
-
--- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
--- zone2 = Route (Rectangle (C 10 0) 5 10)
-
--- batiment = Cabane {
---   forme = Rectangle (C 5 5) 3 3,
---   zoneId = ZonId 1,
---   entree = C 5 8,
---   capacite = 10,
---   habitants = []
--- }
-
--- nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
-
--- >>>invariantVille nouvelleVille
--- True
-
--- >>> show nouvelleVille
--- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 1 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
-
 -- : pré/post/inv des batiments
 
 precondition_ConstruitBatiment :: Ville -> Zone  -> Batiment -> Bool
@@ -293,30 +200,6 @@ batimentNonPresentDansAutresZones v id z b =
         (Map.toList  (villeZones v))
 
 
--- ville = Ville {
---   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
---   villeCitoyens = Map.empty
--- }
-
--- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) []
--- zone2 = Route (Rectangle (C 10 0) 5 10)
-
--- batiment = Cabane {
---   forme = Rectangle (C 5 5) 3 3,
---   zoneId = ZonId 1,  -- ZoneId du bâtiment, initialement la zone cible
---   entree = C 5 8,
---   capacite = 10,
---   habitants = []
--- }
-
--- nouvelleVille = construireBatiment batiment zone1 (ZonId 1) ville
-
--- -- >>> precondition_ConstruitBatiment ville zone1 batiment
--- -- True
--- -- >>> postcondition_ConstruitBatiment ville zone1 (ZonId 1) batiment  zone1 nouvelleVille
--- -- True
-
-
 
 -- : invariant des batiments
 
@@ -363,87 +246,21 @@ zoneIdBatiment batiment = case batiment of
   Commissariat {zoneId = zid} -> zid
   _ -> error "Unexpected building type"
 
-
--- ville = Ville {
---   villeZones = Map.fromList [(ZonId 1, zone1), (ZonId 2, zone2)],
---   villeCitoyens = Map.empty
--- }
-
--- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) [batiment1, batiment2]
--- zone2 = Route (Rectangle (C 10 0) 5 10)
-
--- batiment1 = Cabane {
---   forme = Rectangle (C 1 1) 3 3,
---   zoneId = ZonId 1,
---   entree = C 5 8,
---   capacite = 10,
---   habitants = []
--- }
-
--- batiment2 = Atelier {
---   forme = Rectangle (C 6 6) 4 4,
---   zoneId = ZonId 1,
---   entree = C 6 10,
---   capacite = 15,
---   employes = []
--- }
-
--- nouvelleVille = supprimerBatiment (zoneIdBatiment batiment1) zone1 ville
--- >>> show ville 
--- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 2 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
-
-
--- >>> show nouvelleVille
--- "Ville {\n  Zones:\n    ZonId 1: Zone r\233sidentielle Rectangle (C {cx = 0, cy = 0}) 10 10 avec 1 b\226timents\n    ZonId 2: Route Rectangle (C {cx = 10, cy = 0}) 5 10\n\n  Citoyens:\n\n}"
-
 preconditionSupprimerBatiment :: Ville -> ZonId -> Zone -> Batiment -> Bool
 preconditionSupprimerBatiment ville zonId z batiment =
-  batimentDansZone ville zonId batiment &&
+  batimentDansZone ville zonId batiment 
+  &&
   case z of
     ZoneResidentielle _ _ -> True
     ZoneIndustrielle _ _ -> True
     ZoneCommerciale _ _ -> True
     _ -> False
 
-
 postconditionSupprimerBatiment :: Ville -> ZonId -> Zone -> Batiment -> Ville -> Bool
 postconditionSupprimerBatiment ville zonId zone batiment nouvelleVille =
 --   batimentDansZone nouvelleVille zonId batiment
     batimentDansZone nouvelleVille zonId batiment
 
-
-
--- -- test
--- ville = Ville {
---   villeZones = Map.fromList [(ZonId 1, zone1)],
---   villeCitoyens = Map.empty
--- }
-
--- zone1 = ZoneResidentielle (Rectangle (C 0 0) 10 10) [batiment1, batiment2]
-
--- batiment1 = Cabane {
---   forme = Rectangle (C 0 0) 3 3,
---   zoneId = ZonId 1,
---   entree = C 0 3,
---   capacite = 10,
---   habitants = []
--- }
-
--- batiment2 = Atelier {
---   forme = Rectangle (C 6 6) 4 4,
---   zoneId = ZonId 1,
---   entree = C 6 10,
---   capacite = 15,
---   employes = []
--- }
-
--- -- >>> preconditionSupprimerBatiment ville (ZonId 1) zone1 batiment1
--- -- True
-
--- nouvelleVille = supprimerBatiment (zoneIdBatiment batiment1) zone1 ville
-
--- -- >>> postconditionSupprimerBatiment ville (ZonId 1) zone1 batiment1 nouvelleVille
--- -- True
 
 
 

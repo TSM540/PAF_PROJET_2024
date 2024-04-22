@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+-- {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 module Forme where
 
 -- Constructeurs
@@ -121,7 +121,7 @@ collision f1 f2 =
     || appartient (C (getE (limites f1)) (getN (limites f1))) f2
     || appartient (C (getE (limites f1)) (getS (limites f1))) f2)
     -- Vérifier si les formes sont adjacentes
-    && adjacentes f1 f2
+    || adjacentes f1 f2
 
 
 

@@ -75,3 +75,6 @@ f6 = Rectangle (C 2 2) 2 2
 
 -- >>> collision f1 f2
 -- True
+
+-- >>> collision f3 f4
+-- False

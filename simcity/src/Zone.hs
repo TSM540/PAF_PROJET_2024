@@ -52,5 +52,7 @@ zonesDisjointes z1 z2 =
     not (collision  (zoneForme z1) (zoneForme z2))
 
 
+-- >>> zoneForme (Eau (Rectangle (C 0 0) 10 5))
+-- Rectangle (C {cx = 0, cy = 0}) 10 5
 
 
