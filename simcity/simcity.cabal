@@ -27,10 +27,15 @@ library
   exposed-modules:
       Batiment
       Citoyen
+      Entreprise
       Forme
+      Maladies
       Occupation
+      Parking
       Prefecture
+      Produit
       Types
+      Vehicule
       Ville
       Zone
   other-modules:
@@ -64,7 +69,6 @@ test-suite simcity-test
   other-modules:
       Forme
       FormSpec
-      VilleSpec
       Paths_simcity
   autogen-modules:
       Paths_simcity

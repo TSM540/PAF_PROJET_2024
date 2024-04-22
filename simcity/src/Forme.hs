@@ -7,13 +7,6 @@ data  Coord = C{
     cy :: Int
 } deriving (Show, Eq)
 
--- >>> C 1 2
-
--- E : East (Est)
--- W : West (Ouest)
--- N : North (Nord)
--- S : South (Sud)
--- E W N S
 
 data Forme =
         HSegement Coord Int -- Point le plus à W et la longueur du segement
@@ -27,14 +20,7 @@ limites (HSegement (C x y) l) = (x, x+l, y, y) -- Point le plus a gauche, Point 
 limites (VSegement (C x y) l) = (x, x, y, y+l)
 limites (Rectangle (C x y) w h) = (x, x+w, y, y+h)
 
-forme1 = HSegement (C 1 2) 5
--- >>> limites forme1 -- (1, 6, 2, 2)
--- forme2 = VSegement (C 3 4) 3
--- >>> limites forme2 
--- (3, 3, 4, 7)
--- forme3 = Rectangle (C 0 0) 10 5
--- >>> limites forme3 
--- (0, 10, 0, 5)
+
 -- NB on peut utiliser la fonction limites sans trop se casser la tête avec le type de la forme
 -- c'est une meilleure solution mais j'ai préféré re-utiliser le code juste pour débugger
 appartient :: Coord -> Forme -> Bool
@@ -42,12 +28,7 @@ appartient (C x y) (HSegement (C x' y') l) = y == y' && x >= x' && x <= x+l
 appartient (C x y) (VSegement (C x' y') l) = x == x' &&y >= y' && y <= y+l
 appartient (C x y) (Rectangle (C x' y') w h) =x >= x' && x <= x+w && y >= y' &&y <= y+h
 
--- >>> appartient (C 3 2) forme1
--- True
--- >>> appartient (C 3 2) forme2
--- False
--- >>> appartient (C 3 2) forme3
--- True
+
 
 
 adjacent ::Coord -> Forme -> Bool
@@ -62,23 +43,6 @@ adjacent (C cx cy) (Rectangle (C x y) w h) =
     || cy == y+h && (cx > x) && (cx < x+w) -- point entre le point le plus a gauche et le point le plus a droite du rectangle a la position Sud, mais pas sur les coins
 
 
-point1 = C (-1) 1
-segment1 = HSegement (C 0 1) 5
--- >>> adjacent point1 segment1
--- False
-
-point2 = C 0 0
-segment2 = VSegement (C 0 1) 5
--- >>> adjacent point2 segment2
--- False
-
-point3 = C 2 5
-rectangle1 = Rectangle (C 0 0) 5 5
--- >>> adjacent point3 rectangle1
--- True
-
--- >>> adjacent (C 0 0) (Rectangle (C 0 0) 5 5)
--- False
 
 -- ! la fonction proche renvoi su un point est il est proche d'une forme (a une distance de 1)
 proche :: Coord -> Forme -> Bool
@@ -125,7 +89,7 @@ proche (C cx cy) (Rectangle (C x y) w h) =
     -- si il est a Bas Droite
     || (cx==x+w+1) && (cy==y+h+1) -- point en Bas Droite
 
--- ! récuperer les 
+-- ! getters pour les limites car windows ne peut pas renvoyer les tuples 
 getW (a,_,_,_) = a
 getE (_,b,_,_) = b
 getN (_,_,c,_) = c
@@ -133,29 +97,22 @@ getS (_,_,_,d) = d
 
 collisionApprox :: Forme -> Forme -> Bool
 collisionApprox f1 f2 =
-    getE (limites f1) <= getW (limites f2) && getE (limites f1) >= getW (limites f2) -- si les limites de l'axe X de f1 sont en collision avec les limites de l'axe X de f2
-    && getN (limites f1) <= getS (limites f2) && getS (limites f1) >= getN (limites f2) -- si les limites de l'axe Y de f1 sont en collision avec les limites de l'axe Y de f2
-    -- on retourne les faux positifs si les coordonnées W E N S de f1 sont proche de f2
-  || proche (C (getW (limites f1)) (getN (limites f1))) f2
+    -- getE (limites f1) <= getW (limites f2) && getE (limites f1) >= getW (limites f2) -- si les limites de l'axe X de f1 sont en collision avec les limites de l'axe X de f2
+    -- && (getN (limites f1) <= getS (limites f2) && getS (limites f1) >= getN (limites f2)) -- si les limites de l'axe Y de f1 sont en collision avec les limites de l'axe Y de f2
+    -- -- on retourne les faux positifs si les coordonnées W E N S de f1 sont proche de f2
+
+   proche (C (getW (limites f1)) (getN (limites f1))) f2
   || proche (C (getW (limites f1)) (getS (limites f1))) f2
   || proche (C (getE (limites f1)) (getN (limites f1))) f2
   || proche (C (getE (limites f1)) (getS (limites f1))) f2
+  ||
+      (appartient (C (getW (limites f1)) (getN (limites f1))) f2
+    || appartient (C (getW (limites f1)) (getS (limites f1))) f2
+    || appartient (C (getE (limites f1)) (getN (limites f1))) f2
+    || appartient (C (getE (limites f1)) (getS (limites f1))) f2)
 
-f1 = Rectangle (C 0 0) 10 5
-f2 = Rectangle (C 5 5) 10 5
 
-f3 = Rectangle (C 0 0) 2 2
-f4 = Rectangle (C 4 4) 2 2
 
-f5 = Rectangle (C 0 0) 2 2
-f6 = Rectangle (C 2 2) 2 2
-
--- >>> collision_approx f1 f2
--- True
--- >>> collision_approx f3 f4
--- False
--- >>> collision_approx f5 f6
--- True
 collision :: Forme -> Forme -> Bool
 collision f1 f2 =
     -- Vérifier si les formes se chevauchent
@@ -176,8 +133,3 @@ adjacentes f1 f2 =
   || adjacent (C (getW (limites f1)) (getS (limites f1))) f2
   || adjacent (C (getE (limites f1)) (getN (limites f1))) f2
   || adjacent (C (getE (limites f1)) (getS (limites f1))) f2
-
-
-
-
--- >>> collison f1 f2
