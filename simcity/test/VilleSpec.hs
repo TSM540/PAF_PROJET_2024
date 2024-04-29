@@ -226,3 +226,7 @@ villeSpec = do
   describe "villeVerifiantAdjacenceARoute" $ do
     it "vérifie si une ville vérifie l'adjacence à une route" $ do
       villeVerifiantAdjacenceARoute villeTest `shouldBe` False
+
+          -- evaluate (ajouterPassagers vehic3 [CitId 2, CitId 3, CitId 4, CitId 5, CitId 6, CitId 8, CitId 7]) `shouldThrow` errorCall "Le nombre de passagers depasse la capacite du vehicule"
+            -- show (ajouterPassagers vehic3 [CitId 2, CitId 3]) `shouldBe` "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeEntreprise (EntrepriseId 2)), passagers = [CitId 2,CitId 3], prixVehic = 1000.0, capacitePassagers = 5}"
+            -- ajouterPassagers vehic3 [CitId 3, CitId 3] `shouldBe` "Un passager ne peut pas etre ajouté deux fois"

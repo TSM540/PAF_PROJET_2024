@@ -76,7 +76,7 @@ nombreDePassagersDepassantCapacite (Vehicule _ _ _ _ passagers _ c) = length pas
 voitureAPropritaire :: Vehicule -> Bool 
 voitureAPropritaire (Vehicule _ _ _ (Just (VehiculeEntreprise _)) _ _ _) = True
 voitureAPropritaire (Vehicule _ _ _ (Just (VehiculeCitoyen _)) _ _ _) = True
-voitureAPropritaire _ = False
+voitureAPropritaire ((Vehicule _ _ _ Nothing _ _ _)) = False
 
 sansPassagerDoublons :: Vehicule -> Bool
 sansPassagerDoublons (Vehicule _ _ _ _ passagers _ _) = length passagers == length (Prelude.nub passagers)
