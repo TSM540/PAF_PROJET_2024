@@ -5,6 +5,7 @@ import VilleSpec as VS
 import VehiculeSpec
 import ProduitSpec as PS
 import ParkingSpec as PAS
+import PrefectureSpec as PRS
 main :: IO ()
 main = hspec $ do
     FS.formeSpec
@@ -13,3 +14,4 @@ main = hspec $ do
     VehiculeSpec.vehiculeSpec
     PS.produitSpec
     PAS.parkingSpec
+    PRS.prefectureSpec

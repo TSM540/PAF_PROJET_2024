@@ -26,7 +26,7 @@ naturalisation (Prefecture _ _ citoyens) c =
             if aDesCrimes personne
               then error "Vous avez des crimes, vous ne pouvez pas être naturalisé"
               else naturaliserEtranger personne
-          Immigrant _ _ -> error "Vous Immigrant, vous ne pouvez pas être naturalisé car vous ne dispôsez pas des ressources nécessaires (Habitat, Travail)"
+          Immigrant _ _ -> error "Vous êtes Immigrant, vous ne pouvez pas être naturalisé car vous ne dispôsez pas des ressources nécessaires (Habitat, Travail)"
           Emigrant  _ -> error "Vous êtes bien émigré, vous ne pouvez pas être naturalisé "
     else error " Vous n'êtes dépendant de cette préfecture"
 
@@ -41,7 +41,7 @@ naturaliserEtranger personne =
     Etranger (Salarie  ansResidence) ->
       if ansResidence >= AnsResidence 5
         then  personne {nationalite = Francais}
-        else error " ansResidence < 5"
+        else error " vous n'avez pas atteint 5 ans de résidence "
     _ -> error "Vous êtes déjà français"
 
 aDesCrimes :: Personne -> Bool
