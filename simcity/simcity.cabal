@@ -46,7 +46,8 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      QuickCheck
+      Cabal-syntax
+    , QuickCheck
     , base >=4.7 && <5
     , containers
     , hspec
@@ -62,7 +63,8 @@ executable simcity-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck
+      Cabal-syntax
+    , QuickCheck
     , base >=4.7 && <5
     , containers
     , hspec
@@ -73,8 +75,9 @@ test-suite simcity-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Forme
-      FormSpec
+      FormeSpec
+      VilleSpec
+      ZoneSpec
       Paths_simcity
   autogen-modules:
       Paths_simcity
@@ -82,7 +85,8 @@ test-suite simcity-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck
+      Cabal-syntax
+    , QuickCheck
     , base >=4.7 && <5
     , containers
     , hspec

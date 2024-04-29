@@ -24,6 +24,7 @@ dependencies:
 - containers
 - hspec
 - QuickCheck
+- Cabal-syntax
 
 ghc-options:
 - -Wall
