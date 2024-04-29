@@ -27,8 +27,10 @@ changerPosteEmployer (Entreprise eid  batiments employes capital lv) cid p =
 augmenterCapital :: Entreprise -> Float -> Maybe Entreprise
 augmenterCapital (Entreprise eid  batiments employes capital lv) montant =
      let ne = Entreprise eid  batiments employes (capital + montant) lv in
-        if invariantEntreprise ne then Just ne
-                           else  Nothing
+        if montant < 0 then error "Vous ne pouvez pas rajoputer un montant négatif"
+        else
+            if invariantEntreprise ne then Just ne
+                               else  Nothing
 
 diminuerCapital :: Entreprise -> Float -> Maybe Entreprise
 diminuerCapital e@(Entreprise eid  batiments employes capital lv) montant =
@@ -54,6 +56,8 @@ enleverBatiment e bid =
 
 filtrerBatiment :: Entreprise -> BatId -> Entreprise
 filtrerBatiment (Entreprise eid  batiments employes capital lv) bid =
+    if  bid `notElem` batiments then error "batiment non trouvé"
+    else
         Entreprise eid  (filter (bid /=) batiments) employes capital lv
 
 
@@ -77,15 +81,15 @@ entepriseAyantDesBatiments (Entreprise _  batiments _ _ _) = not (null batiments
 entrepriseAyantUnSeulCEO :: Entreprise -> Bool
 entrepriseAyantUnSeulCEO (Entreprise _  _ employes _ _) = length (filter (\(_,p) -> p == CEO) employes) == 1 ||
                                                         if not (any (\(_,p) -> p == CEO) employes) then error "Votre entreprise n'a plus de CEO"
-                                                        else           error "Votre entreprise doit avoir un seul CEO"
+                                                        else  error "Votre entreprise doit avoir un seul CEO"
 
 
 acheterVehiculeParEntreprise :: Entreprise -> Vehicule -> (Entreprise, Vehicule)
-acheterVehiculeParEntreprise (Entreprise id bat empl capital lv) 
-            vehicule@(Vehicule idv typev imm prop pass prix cap) = 
+acheterVehiculeParEntreprise (Entreprise id bat empl capital lv)
+            vehicule@(Vehicule idv typev imm prop pass prix cap) =
                let nv = achatVehicule vehicule (VehiculeEntreprise id) in
                 if capital - prix < 0 then error "L'entreprise n'a pas assez de capital pour acheter ce véhicule"
-                else ( 
+                else (
                       Entreprise id bat empl (capital - prix) (getVehiculeId nv : lv)
                     ,
                     nv

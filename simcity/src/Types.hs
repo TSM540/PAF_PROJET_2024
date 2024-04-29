@@ -93,4 +93,3 @@ getCitoyenId :: PropritaireVehicule -> CitId
 getCitoyenId (VehiculeCitoyen cid) = cid
 getCitoyenId (VehiculeEntreprise _) = error "Ce vehicule appartient a un citoyen"
 
-
