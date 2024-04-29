@@ -37,6 +37,7 @@ vehiculeSpec = do
         describe "vehiculeParCitoyen" $ do
           it "vérifie si un citoyen est propriétaire d'un véhicule" $ do
             evaluate (vehiculeParCitoyen vehic2 (CitId 1)) `shouldThrow` errorCall "Ce citoyen est deja proprietaire de ce vehicule"
+          it "vérifie si un citoyen est propriétaire d'un véhicule" $ do
             evaluate (vehiculeParCitoyen vehic1 (CitId 1)) `shouldThrow` errorCall "Ce vehicule appartient a une entreprise et ne peut pas etre vendu a un citoyen"
 
         describe "vehiculeParEntreprise" $ do
@@ -44,18 +45,21 @@ vehiculeSpec = do
               evaluate nvehiEntre `shouldThrow`errorCall "Ce vehicule appartient deja a cette entreprise et ne peut pas être revendu a elle même"
         -- all good
         describe "achatVehicule" $ do
-          it "vérifie l'achat de véhicule par un citoyen" $ do
+          it "vérifie l'achat de véhicule par un citoyen qui est fausse " $ do
                  evaluate nvehiCit `shouldThrow` errorCall "Ce citoyen est deja proprietaire de ce vehicule"
+          it "vérifie l'achat de véhicule par un citoyen qui est vrai" $ do
                  show nvehiCit' `shouldBe`  "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeCitoyen (CitId 2)), passagers = [], prixVehic = 1000.0, capacitePassagers = 5}"
-          it "vérifie l'achat de véhicule sans propriétaire" $ do
+          it "vérifie l'achat de véhicule sans propriétaire qui est vrai" $ do
             show nvehicNothing `shouldBe` "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeCitoyen (CitId 2)), passagers = [], prixVehic = 1000.0, capacitePassagers = 5}"
+          it "vérifie l'achat de véhicule sans propriétaire qui est vrai" $ do 
             show nvehicNothing' `shouldBe` "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeEntreprise (EntrepriseId 2)), passagers = [], prixVehic = 1000.0, capacitePassagers = 5}"
-          it "vérifie l'achat de véhicule par une entreprise" $ do
+          it "vérifie l'achat de véhicule par une entreprise qui est fausse" $ do
             evaluate nvehiEntre `shouldThrow` errorCall "Ce vehicule appartient deja a cette entreprise et ne peut pas être revendu a elle même"
+          it "vérifie l'achat de véhicule par une entreprise qui est vrai" $ do
             show nvehiEntre' `shouldBe` "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeEntreprise (EntrepriseId 2)), passagers = [], prixVehic = 1000.0, capacitePassagers = 5}"
 
         describe "ajouterPassagers" $ do
-          it "ajout des passagers à un véhicule" $ do
+          it "ajout des passagers à un véhicule qui est vrai" $ do
               show (ajouterPassagers vehic3 [CitId 2, CitId 3]) `shouldBe` "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeEntreprise (EntrepriseId 2)), passagers = [CitId 2,CitId 3], prixVehic = 1000.0, capacitePassagers = 5}"
               show (ajouterPassagers vehic3 [CitId 2, CitId 3]) `shouldBe` "Vehicule {idVehic = VehicId 3, typeVehic = Voiture, immatriculation = \"12534\", propriataire = Just (VehiculeEntreprise (EntrepriseId 2)), passagers = [CitId 2,CitId 3], prixVehic = 1000.0, capacitePassagers = 5}"
           it "vérifie les erreurs lors de l'ajout des passagers" $ do

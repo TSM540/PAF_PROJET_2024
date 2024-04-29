@@ -76,6 +76,7 @@ test-suite simcity-test
   main-is: Spec.hs
   other-modules:
       FormeSpec
+      ParkingSpec
       ProduitSpec
       VehiculeSpec
       VilleSpec

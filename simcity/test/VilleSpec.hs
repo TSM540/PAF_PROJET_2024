@@ -216,10 +216,10 @@ villeSpec = do
       invariantZonesDisjointes maVille2 `shouldBe` False
 
   describe "estAdjacenteARoute" $ do
-    it "vérifie si une zone est adjacente à une route dans une ville" $ do
+    it "vérifie si une zone est adjacente à une route dans une ville qui est vrai" $ do
       estAdjacenteARoute ztestTrue villeTest `shouldBe` True
       estAdjacenteARoute z2 villeTest `shouldBe` True
-    it "vérifie si une zone n'est pas adjacente à une route dans une ville" $ do
+    it "vérifie si une zone n'est pas adjacente à une route dans une ville qui est fausse" $ do
       estAdjacenteARoute z1 villeTest `shouldBe` False
       estAdjacenteARoute zTestFalse villeTest `shouldBe` False
 

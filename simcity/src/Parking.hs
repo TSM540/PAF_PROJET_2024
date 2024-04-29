@@ -20,8 +20,14 @@ ajouterVoitureAuParking v oldparking@(ParkingMaison c vs id) =
 ajouterVoitureAuParking v (ParkingImmeuble c vs id) = if invariantParking (ParkingImmeuble c (v:vs) id) then Just (ParkingImmeuble c (v:vs) id ) else Nothing
 
 enleverVoitureDuParking :: VehicId -> Parking -> Parking
-enleverVoitureDuParking v (ParkingMaison c vs id) = ParkingMaison c (filter (/=v) vs) id
-enleverVoitureDuParking v (ParkingImmeuble c vs id) = ParkingImmeuble c (filter (/=v) vs) id
+enleverVoitureDuParking v (ParkingMaison c vs pid) = 
+                if v `elem` vs then 
+                    ParkingMaison c (filter (/=v) vs) pid
+                else error "La voiture n'est pas dans le parking maison"
+enleverVoitureDuParking v (ParkingImmeuble c vs id) = 
+                if v `elem` vs then    
+                        ParkingImmeuble c (filter (/=v) vs) id
+                else error "La voiture n'est pas dans le parking immeuble"
 
 
 parkingVide :: Parking -> Bool
@@ -39,7 +45,7 @@ parkingDisponible p@(ParkingImmeuble (Capacite c) vs _) = length vs < c && c > 0
 
 parkingMaisonA6PlacesAuPlus :: Parking -> Bool
 parkingMaisonA6PlacesAuPlus (ParkingMaison (Capacite c) _ _) = c <= 6 || if c > 6 then error "Le parking maison ne peut pas avoir plus de 6 places" else error "la capacité est nulle ou négative"
-
+parkingMaisonA6PlacesAuPlus _ = True
 
 
 invariantParking :: Parking -> Bool
