@@ -11,6 +11,7 @@ data Zone =
     | ZoneIndustrielle Forme [Batiment]
     | ZoneCommerciale Forme [Batiment]
     | Admin Forme Batiment
+    deriving (Eq)
 --instance de Zone 
 
 instance Show Zone where
@@ -41,7 +42,9 @@ estZoneValide (ZoneCommerciale _ _) = True
 estZoneValide (Admin _ _) = True
 
 
-
+estZoneRoutiere :: Zone -> Bool
+estZoneRoutiere (Route _) = True
+estZoneRoutiere _ = False
 
 
 -- >>> zoneForme (Eau (Rectangle (C 0 0) 10 5))

@@ -54,3 +54,4 @@ invariantParking p@(ParkingMaison (Capacite c) vs _) = parkingDisponible p
 
 invariantParking p@(ParkingImmeuble (Capacite c) vs _) = parkingDisponible p
 
+

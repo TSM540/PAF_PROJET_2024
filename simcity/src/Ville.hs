@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use camelCase" #-}
 {-# OPTIONS_GHC -Wno-overlapping-patterns #-}
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Ville where
 
 import Zone
@@ -10,6 +11,8 @@ import Forme
 import Data.Map as Map
 import Occupation
 import Batiment
+import Vehicule
+import Parking
 
 -- données
 data Ville = Ville {
@@ -44,9 +47,9 @@ invariantVille  v=
             invariantZonesDisjointes v
              &&
             villeVerifiantAdjacenceARoute v
-            && 
+            &&
             routesConnexes v
-            && 
+            &&
             invariantBatiments v
 
 --  toutes les zones soit disjointes deux `a deux
@@ -57,7 +60,7 @@ invariantVille  v=
 
 invariantZonesDisjointes :: Ville -> Bool
 invariantZonesDisjointes ville =
-    all (\(zonId1, zone1) -> all (\(zonId2, zone2) -> zonId1 == zonId2 
+    all (\(zonId1, zone1) -> all (\(zonId2, zone2) -> zonId1 == zonId2
     || zonesDisjointes zone1 zone2) (Map.toList (villeZones ville))) (Map.toList (villeZones ville))
 
 
@@ -68,8 +71,8 @@ invariantZonesDisjointes ville =
 --                       Route _ -> True
 --                       _       -> False) (Map.toList (villeZones ville))
 estAdjacenteARoute :: Zone -> Ville -> Bool
-estAdjacenteARoute z ville = any (\z' -> case z' of 
-        Route _ -> adjacentes (zoneForme z) (zoneForme z'); 
+estAdjacenteARoute z ville = any (\z' -> case z' of
+        Route _ -> adjacentes (zoneForme z) (zoneForme z');
         _ -> False) (Map.elems (villeZones ville))
 
 
@@ -248,7 +251,7 @@ zoneIdBatiment batiment = case batiment of
 
 preconditionSupprimerBatiment :: Ville -> ZonId -> Zone -> Batiment -> Bool
 preconditionSupprimerBatiment ville zonId z batiment =
-  batimentDansZone ville zonId batiment 
+  batimentDansZone ville zonId batiment
   &&
   case z of
     ZoneResidentielle _ _ -> True
@@ -262,5 +265,22 @@ postconditionSupprimerBatiment ville zonId zone batiment nouvelleVille =
     batimentDansZone nouvelleVille zonId batiment
 
 
+-- faire rouler les vehicules
 
+roulerVehicule :: Vehicule -> Ville -> Zone -> Zone -> Parking-> Parking -> (Parking,Parking)
+roulerVehicule vehicule v zoneDepart zoneArrivee parkingDepart parkingArrivee
+        | zoneDepart == zoneArrivee = error "Le vehicule est deja dans la zone d'arrivee"
+        | not (estZoneRoutiere zoneDepart) = error "La zone de depart n'est pas une zone routiere"
+        | not (estZoneRoutiere zoneArrivee) = error "La zone d'arrivee n'est pas une zone routiere"
+        -- | not (routesConnexes v) = error "Les zones de depart et d'arrivee ne sont pas connectees"
+        | not (roulerCorrectement vehicule) = error "Le vehicule ne peut pas rouler"
+        | otherwise =
+            let resultatEnlevement = enleverVoitureDuParking (getVehiculeId vehicule) parkingDepart in
+                case resultatEnlevement  of
+                    parkingEnlevee ->
+                        let resultatAjout = ajouterVoitureAuParking (getVehiculeId vehicule) parkingArrivee in
+                            case resultatAjout of
+                                Just parkingAjoutee -> (parkingEnlevee, parkingAjoutee)
+                                Nothing -> error "Le parking d'arrivee est plein"
+                    _ -> error "La voiture n'est pas dans le parking de depart"
 
