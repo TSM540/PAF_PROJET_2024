@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
+-- {-# OPTIONS_GHC -Wno-unused-imports #-}
 module BatimentSpec where
 import Batiment
 import Forme
@@ -50,7 +50,9 @@ banque2 :: Batiment
 banque2 = Banque (BankId 1) (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 1000 [cid1,  cid2]
 
 banque3 :: Batiment 
-banque3 = Banque (BankId 2) (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 1000 [citoyen1]
+banque3 = Banque (BankId 2) (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 1000 [citoyen1,cid2]
+banque4 :: Batiment
+banque4 = Banque (BankId 2) (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 1000 [cid2]
 
 c1 :: Coord
 c1 = C 1 1
@@ -112,6 +114,58 @@ cit4 :: Citoyen
 (bk1',bk3,cit3,cit4) = virementBancaire banque1 10 banque3 alice bob
 
 
+-- ! ******** HOPITAUX ********
+hopital :: Batiment
+hopital = Hopital (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 [id1] True
+id1 :: CitId
+personne :: Personne
+id1 = CitId 1
+personne = Personne {
+  idCit = id1,
+  coord = C 0 0,
+  occupation = Travailler 100.0,
+  crimes = [],
+  nationalite = Francais,
+  maladies = []
+}
+v :: Vie
+v = Vie {
+  argentEnBanque = 1000,
+  sante = 100,
+  niveauFaim = 50,
+  niveauFatigue = 50
+}
+vp :: ViePersonnelle
+vp = ViePersonnelle {
+  maison = BatId 1,
+  travail = Just (BatId 2),
+  courses = Just (BatId 3),
+  vehicules = []
+}
+
+citoyen :: Citoyen
+citoyen = Habitant personne v vp
+
+id2 :: CitId
+id2 = CitId 2
+
+
+-- ! ****** Vente de produits ******
+
+
+
+produit :: Produit
+produit = Produit (ProdId 1) "Pain" 0.5 (Alimentaire Pain Frais) Local
+
+epicerie :: Batiment
+epicerie = Epicerie (Rectangle (C 0 0) 10 10) (ZonId 1) (C 5 8) 10 [] (StockProduit [(produit, Quantite 1)])
+
+res :: (Batiment, Produit)
+res = vendreProduit epicerie produit
+b :: Batiment
+(b,_)=res
+res' :: (Batiment, Produit)
+res' = vendreProduit b produit
 
 batimentSpec :: Spec
 batimentSpec = do 
@@ -160,25 +214,49 @@ batimentSpec = do
         it "affichage de la deuxième personne après le virement" $ do
             show cit2 `shouldBe` "Habitant : Personne {idCit = CitId 2, coord = C {cx = 2, cy = 2}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 510.0, sante = 80, niveauFaim = 0, niveauFatigue = 0}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3), vehicules = []}"
         it "affichage de la banque 1 avant le virment" $ do
-            show bk1 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 0 clients"
+            show bk1 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 2 clients"
         it "affichage de la banque 2 avant le virment" $ do
-            show bk2 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 0 clients"
+            show bk2 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 2 clients"
         -- c'est la même banque
         it "affichage de la banque 1 après le virment" $ do
-            show bk1 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 0 clients"
+            show bk1 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 2 clients"
         it "affichage de la banque 2 après le virment" $ do
-            show bk2 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 0 clients"
+            show bk2 `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1000.0 et 2 clients"
         describe "Nested Banks" $ do 
-            it "virement entre banque 1 et 3 " $ do 
-                show bk1' `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 990.0 et 0 clients"
-                show bk3 `shouldBe` "Banque BankId 2 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1010.0 et 1 clients"
-                show cit3 `shouldBe` "Habitant : Personne {idCit = CitId 1, coord = C {cx = 1, cy = 1}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 490.0, sante = 80, niveauFaim = 0, niveauFatigue = 0}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3), vehicules = []}"
-                show cit4 `shouldBe` "Habitant : Personne {idCit = CitId 2, coord = C {cx = 2, cy = 2}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 510.0, sante = 80, niveauFaim = 0, niveauFatigue = 0}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3), vehicules = []}"
+            describe "virement entre banque 1 et 3 " $ do 
+                it "banque 1" $ do    
+                    show bk1' `shouldBe` "Banque BankId 1 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 990.0 et 2 clients"
+                it "banque 3" $ do   
+                    show bk3 `shouldBe` "Banque BankId 2 Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec un argent de 1010.0 et 2 clients"
+                it "alice" $ do    
+                    show cit3 `shouldBe` "Habitant : Personne {idCit = CitId 1, coord = C {cx = 1, cy = 1}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 490.0, sante = 80, niveauFaim = 0, niveauFatigue = 0}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3), vehicules = []}"
+                it "bob" $ do    
+                    show cit4 `shouldBe` "Habitant : Personne {idCit = CitId 2, coord = C {cx = 2, cy = 2}, occupation = Travailler avec 100.0\8364 de salaire journalier, crimes = [], nationalite = Francais, maladies = []}, Vie : Vie {argentEnBanque = 510.0, sante = 80, niveauFaim = 0, niveauFatigue = 0}, Vie Personnelle : ViePersonnelle {maison = BatId 1, travail = Just (BatId 2), courses = Just (BatId 3), vehicules = []}"
             describe "erreurs dans le virement " $ do 
                 it "emetteur n'a pas suffisament d'argent" $ do 
                     virementCitoyenVersCitoyen alice 10000 bob  `shouldBe` Nothing
                 it "la banque n'a pas suffisement d'argent" $ do
                     virementBanqueVersBanque banque1 10000 banque3 `shouldBe` Nothing
-                -- it "l'emetteur n'est pas dans la banque dont il envoie de l'argent" $ do 
-                --      evaluate (virementBancaire banque3 10 banque3 alice bob) `shouldThrow` errorCall "l'emetteur n'est pas un client de la banque"
-                    
+                it "l'emetteur n'est pas dans la banque dont il envoie de l'argent" $ do 
+                     evaluate (virementBancaire banque4 10 banque4 alice bob) `shouldThrow` errorCall "l'emetteur n'est pas un client de la banque"
+                it "le recepteur n'est pas dans la banque dont il reçoit de l'argent" $ do 
+                     evaluate (virementBancaire banque4 10 banque4 bob alice) `shouldThrow` errorCall "le recepteur n'est pas un client de la banque"
+                                       
+    describe "Les hopitaux" $ do 
+        it "capacité de l'hopital" $ do
+            getCapacite hopital `shouldBe` 10
+        it "invariant de l'hopital" $ do
+            invariantBatiment hopital `shouldBe` True
+        it "ajouter un patient déjà hospitalisé" $ do
+            evaluate (show (ajouterPatient hopital id1) )`shouldThrow` errorCall "le citoyen est déjà hospitalisé"
+        it "hospitaliser un patient déjà hospitalisé" $ do
+            evaluate (show (hospitaliser citoyen hopital)) `shouldThrow` errorCall "le citoyen est déjà hospitalisé"
+        it "sortir un patient de l'hopital" $ do
+            show (sortirPatientDeL'Hopital id1 hopital) `shouldBe` "Hopital Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 patients et un heliport True"
+        it "sortir un patient qui n'est pas hospitalisé" $ do
+            evaluate (show (sortirPatientDeL'Hopital id2 hopital)) `shouldThrow` errorCall "le citoyen n'est pas hospitalisé dans cette hopital"
+    describe "vente de produits " $ do 
+        it "vendre un produit" $ do
+            show  res `shouldBe` "(Epicerie Rectangle (C {cx = 0, cy = 0}) 10 10 dans la zone ZonId 1 avec une capacit\233 de 10 et 0 clients et StockProduit [(Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 0.5, typeProd = Alimentaire Pain Frais, production = Local},Quantite 0)] stock,Produit {idProd = ProdId 1, nomProd = \"Pain\", prixProd = 0.5, typeProd = Alimentaire Pain Frais, production = Local})"
+        it "revendre le produit est est en rupture de stock" $ do
+            evaluate (show res') `shouldThrow` errorCall "This product is out of stock"
