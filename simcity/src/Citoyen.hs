@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 module Citoyen where
 import Forme
 import Occupation
@@ -196,3 +197,6 @@ acheterVehiculeParCitoyen (Habitant (Personne id c o cri nat m) v@(Vie argent sa
                     nv{passagers= []}
                 )
 
+
+getCitoyenId :: Citoyen -> CitId
+getCitoyenId (Habitant (Personne id _ _ _ _ _) _ _) = id

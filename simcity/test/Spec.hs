@@ -8,6 +8,7 @@ import ParkingSpec as PAS
 import PrefectureSpec as PRS
 import EntrepriseSpec as ES
 import CitoyenSpec as CS
+import BatimentSpec as BS
 main :: IO ()
 main = hspec $ do
     FS.formeSpec
@@ -19,3 +20,4 @@ main = hspec $ do
     PRS.prefectureSpec
     ES.entrepriseSpec
     CS.citoyenSpec
+    BS.batimentSpec

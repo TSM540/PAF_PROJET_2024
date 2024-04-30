@@ -75,6 +75,7 @@ test-suite simcity-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      BatimentSpec
       CitoyenSpec
       EntrepriseSpec
       FormeSpec

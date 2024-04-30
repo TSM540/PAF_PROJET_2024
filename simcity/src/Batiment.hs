@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 module Batiment where
 import Forme
 import Types
@@ -218,13 +220,15 @@ diminuerNombreCamion (CasernePompier forme zoneId entree pompiers camions helipo
 
 
 virementBancaire :: Batiment -> Float -> Batiment->Citoyen-> Citoyen-> (Batiment,Batiment, Citoyen, Citoyen)
-virementBancaire b1 montant b2 emetteur recepteur =
-                  let b1'= getFstMaybe (virementBanqueVersBanque b1 montant b2) in
-                  let b2' = getSndMaybe (virementBanqueVersBanque b1 montant b2) in
-                  let emetteur' = getFstMaybe (virementCitoyenVersCitoyen emetteur montant recepteur) in
-                  let recepteur' = getSndMaybe (virementCitoyenVersCitoyen emetteur montant recepteur) in
-                   if b1 == b2 then (b1,b1,emetteur',recepteur') -- si je suis dans la même banque je ne change rien dans le montant de la banque, je change juste le montant des des deux comptes
-                   else  (b1', b2', emetteur', recepteur')
+virementBancaire b1 montant b2 emetteur recepteur
+  | Citoyen.getCitoyenId emetteur `notElem` getClientsBanque b1 = error "l'emetteur n'est pas un client de la banque"
+  | Citoyen.getCitoyenId recepteur `notElem` getClientsBanque b2 = error "le recepteur n'est pas un client de la banque"
+  | otherwise = let b1'= getFstMaybe (virementBanqueVersBanque b1 montant b2) in
+                let b2' = getSndMaybe (virementBanqueVersBanque b1 montant b2) in
+                let emetteur' = getFstMaybe (virementCitoyenVersCitoyen emetteur montant recepteur) in
+                let recepteur' = getSndMaybe (virementCitoyenVersCitoyen emetteur montant recepteur) in
+                 if b1 == b2 then (b1,b1,emetteur',recepteur') -- si je suis dans la même banque je ne change rien dans le montant de la banque, je change juste le montant des des deux comptes
+                 else  (b1', b2', emetteur', recepteur')
 
 
 
@@ -248,6 +252,12 @@ getFstMaybe Nothing = error "Nothing to get"
 getSndMaybe :: Maybe (a,b) -> b
 getSndMaybe (Just (_,b)) = b
 getSndMaybe Nothing = error "Nothing to get"
+
+-- getCitoyenId :: Citoyen -> CitId
+-- getCitoyenId (Habitant (Personne id _ _ _ _ _) _ _) = id
+
+getClientsBanque :: Batiment -> [CitId]
+getClientsBanque (Banque _ _ _ _ _ clients) = clients
 
 
 -- ! invariants 
