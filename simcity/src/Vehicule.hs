@@ -100,3 +100,5 @@ roulerCorrectement v@(Vehicule id t im prop pass prix c)
   | t == Helicoptere = error "Un helicoptere ne peut pas rouler"
   | otherwise = True
 
+getTypeVehicle :: Vehicule -> TypeVehicule
+getTypeVehicle (Vehicule _ t _ _ _ _ _) = t

@@ -284,3 +284,24 @@ roulerVehicule vehicule v zoneDepart zoneArrivee parkingDepart parkingArrivee
                                 Nothing -> error "Le parking d'arrivee est plein"
                     _ -> error "La voiture n'est pas dans le parking de depart"
 
+
+-- Gestion des héliports et des hélicoptères
+
+-- | Atterrir un hélicoptère sur un héliport
+atterirHelico :: Vehicule -> Batiment-> Batiment 
+atterirHelico vehicule batiment 
+            | getTypeVehicle vehicule == Helicoptere =
+                case batiment of
+                    CasernePompier _ _ _ _ _ h -> if h then batiment {heliport = False} else error "L'héliport n'est pas disponible, vous ne pouvez pas atterir maintenant"
+                    Hopital _ _ _ _ _ h -> if h then batiment {heliport = False} else error "L'héliport n'est pas disponible, vous ne pouvez pas atterir maintenant" 
+                    _ -> error "Le batiment n'a pas un héliport"
+            | otherwise = error "Le vehicule n'est pas un hélicoptère"
+                        
+decollerHelico :: Vehicule -> Batiment -> Batiment
+decollerHelico vehicule batiment 
+            | getTypeVehicle vehicule == Helicoptere =
+                case batiment of
+                    CasernePompier _ _ _ _ _ h -> if not h then batiment {heliport = True} else error "Il n'y a pas d'hélicoptère à la caserne car l'héliport est disponible"
+                    Hopital _ _ _ _ _ h -> if not h then batiment {heliport = True} else error "Il n'y a pas d'hélicoptère à l'hôpital car l'héliport est disponible" 
+                    _ -> error "Le batiment n'a pas un héliport"
+            | otherwise = error "Le vehicule n'est pas un hélicoptère"

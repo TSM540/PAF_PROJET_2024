@@ -49,9 +49,9 @@ parkingMaisonA6PlacesAuPlus _ = True
 
 
 invariantParking :: Parking -> Bool
-invariantParking p@(ParkingMaison (Capacite c) vs _) = parkingDisponible p
+invariantParking p@(ParkingMaison (Capacite _) _ _) = parkingDisponible p
                                             && parkingMaisonA6PlacesAuPlus p
 
-invariantParking p@(ParkingImmeuble (Capacite c) vs _) = parkingDisponible p
+invariantParking p@(ParkingImmeuble (Capacite _) _ _) = parkingDisponible p
 
 

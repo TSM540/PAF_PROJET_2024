@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 module VilleSpec where 
 
 import Test.Hspec
@@ -14,6 +15,7 @@ import Batiment
 -- import Parking
 import Vehicule
 import Control.Exception (evaluate)
+import Ville (atterirHelico)
 
 -- Création de quelques zones
 zone1 :: Zone
@@ -210,6 +212,7 @@ zoneEV = ZoneCommerciale (Rectangle (C 8 8) 1 1) []
 
 
 -- Création de la ville
+maVille2 :: Ville
 maVille2 = Ville {
     villeZones = Map.fromList [(ZonId 1, zoneAV), (ZonId 2, zoneBV), (ZonId 3, zoneCV), (ZonId 4, zoneDV), (ZonId 5, zoneEV)],
     villeCitoyens = Map.fromList [(CitId 1, citoyen1), (CitId 2, citoyen2), (CitId 3, citoyen3)]
@@ -330,6 +333,59 @@ vehiculeEstHelicoptere = Vehicule {
                             prixVehic = 100.00,
                             capacitePassagers = 5
                         }
+
+
+-- ****** Helicoptere ******
+
+helico :: Vehicule
+helico = Vehicule {
+                            idVehic = VehicId 1,
+                            typeVehic = Helicoptere,
+                            immatriculation = "1234",
+                            propriataire = Just (VehiculeCitoyen (CitId 1)),
+                            passagers = [CitId 1],
+                            prixVehic = 100.00,
+                            capacitePassagers = 5
+                        }
+
+caserneQuiPeutAccueillirHelico :: Batiment
+caserneQuiPeutAccueillirHelico = CasernePompier {
+                                    forme = Rectangle (C 0 0) 3 3,
+                                    zoneId = ZonId 1,
+                                    entree = C 0 3,
+                                    pompiers = 10,
+                                    camions = 10,
+                                    heliport = True
+                                  }
+caserneQuiNePeutPasAccueillirHelico :: Batiment
+caserneQuiNePeutPasAccueillirHelico = CasernePompier {
+                                    forme = Rectangle (C 0 0) 3 3,
+                                    zoneId = ZonId 1,
+                                    entree = C 0 3,
+                                    pompiers = 10,
+                                    camions = 10,
+                                    heliport = False
+                                  }
+hopitalQuiPeutAccueillirHelico :: Batiment
+hopitalQuiPeutAccueillirHelico = Hopital {
+                                    forme = Rectangle (C 0 0) 3 3,
+                                    zoneId = ZonId 1,
+                                    entree = C 0 3,
+                                    capacite = 10,
+                                    patients = [],
+                                    heliport = True
+                                  }
+hopitalQuiNePeutPasAccueillirHelico :: Batiment
+hopitalQuiNePeutPasAccueillirHelico = Hopital {
+                                    forme = Rectangle (C 0 0) 3 3,
+                                    zoneId = ZonId 1,
+                                    entree = C 0 3,
+                                    capacite = 10,
+                                    patients = [],
+                                    heliport = False
+                                  }
+
+
 villeSpec :: Spec
 villeSpec = do
   describe "show maVille" $ do
@@ -393,5 +449,43 @@ villeSpec = do
           evaluate VilleSpec.resultat5 `shouldThrow` errorCall "Le vehicule ne peut pas rouler sans passagers"
         it "le vehicule est un helicoptere" $ do
           evaluate VilleSpec.resultat6 `shouldThrow` errorCall "Un helicoptere ne peut pas rouler"
-
-  
+  describe "verifier que l'helicoptere peut atterir" $ do
+    describe "Atterissage Caserne de pompier" $ do 
+      it "la caserne peut accueillir un helicoptere" $ do
+         atterirHelico helico caserneQuiPeutAccueillirHelico `shouldBe` caserneQuiPeutAccueillirHelico {heliport = False}
+      it "la caserne ne peut pas accueillir un helicoptere" $ do
+        evaluate (atterirHelico helico caserneQuiNePeutPasAccueillirHelico) `shouldThrow` 
+            errorCall "L'héliport n'est pas disponible, vous ne pouvez pas atterir maintenant"
+    describe "cas d'erreur" $ do
+      it "le batiment n'a pas d'heliport" $ do
+        evaluate (atterirHelico helico batiment1) `shouldThrow` 
+            errorCall "Le batiment n'a pas un héliport"
+      it "le véhicule n'est pas un helicoptere" $ do
+        evaluate (atterirHelico VilleSpec.vehiculeARouler caserneQuiPeutAccueillirHelico) `shouldThrow` 
+            errorCall "Le vehicule n'est pas un hélicoptère"
+    describe "Atterissage à Hopital" $ do
+      it "l'hopital peut accueillir un helicoptere" $ do
+         atterirHelico helico hopitalQuiPeutAccueillirHelico `shouldBe` hopitalQuiPeutAccueillirHelico {heliport = False}
+      it "l'hopital ne peut pas accueillir un helicoptere" $ do
+        evaluate (atterirHelico helico hopitalQuiNePeutPasAccueillirHelico) `shouldThrow` 
+            errorCall "L'héliport n'est pas disponible, vous ne pouvez pas atterir maintenant"
+  describe "decollage de l'helicoptere" $ do
+    describe " decollage de la caserne" $ do 
+      it "decollage de l'helicoptere" $ do
+        decollerHelico helico caserneQuiNePeutPasAccueillirHelico `shouldBe` caserneQuiNePeutPasAccueillirHelico {heliport = True} 
+      it "l'héliport est déjà disponible" $ do
+        evaluate (decollerHelico helico caserneQuiPeutAccueillirHelico) `shouldThrow` 
+            errorCall "Il n'y a pas d'hélicoptère à la caserne car l'héliport est disponible"
+    describe " decollage de l'hopital "$ do 
+      it "decollage de l'helicoptere" $ do
+        decollerHelico helico hopitalQuiNePeutPasAccueillirHelico `shouldBe` hopitalQuiNePeutPasAccueillirHelico {heliport = True} 
+      it "l'héliport est déjà disponible" $ do
+        evaluate (decollerHelico helico hopitalQuiPeutAccueillirHelico) `shouldThrow` 
+            errorCall "Il n'y a pas d'hélicoptère à l'hôpital car l'héliport est disponible"
+    describe "cas d'erreur restant" $ do
+      it "le batiment n'a pas d'heliport" $ do
+        evaluate (decollerHelico helico batiment1) `shouldThrow` 
+            errorCall "Le batiment n'a pas un héliport"
+      it "le véhicule n'est pas un helicoptere" $ do
+        evaluate (decollerHelico VilleSpec.vehiculeARouler caserneQuiPeutAccueillirHelico) `shouldThrow` 
+            errorCall "Le vehicule n'est pas un hélicoptère"
