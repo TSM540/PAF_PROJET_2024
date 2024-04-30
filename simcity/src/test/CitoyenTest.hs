@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-missing-export-lists #-}
 module CitoyenTest where
 import Citoyen
 import Forme
